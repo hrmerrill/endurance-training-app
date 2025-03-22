@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "endurance-training-app"
+version = "0.1.0"
+description = "An app for daily endurance training planning."
+authors = ["Hunter R. Merrill"]
+license = "GNU AGPLv3"
+readme = "README.md"
+
+packages = [
+    { include = "endurance_training_app", from = "backend" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.32.3"
+numpy = "^2.2.4"
+
+
+[tool.poetry.group.dev.dependencies]
+isort = "^6.0.1"
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[project.urls]
+homepage = "https://github.com/hrmerrill/endurance-training-app"
+repository = "https://github.com/hrmerrill/endurance-training-app"
+documentation = "https://github.com/hrmerrill/endurance-training-app"
