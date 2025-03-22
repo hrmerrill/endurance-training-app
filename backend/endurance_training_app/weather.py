@@ -35,4 +35,16 @@ def get_weather_data() -> Dict[str, Any]:
     # now collect the weather forecast
     forecast_response = requests.get(points_endpoint)
     forecast_data = forecast_response.json()
-    return forecast_data
+
+    # next three hours
+    next_3_hours = forecast_data["properties"]["periods"][:3]
+    next_3_hours = [
+        {
+            "temperature": hour["temperature"],
+            "rainfall_chance": hour["probabilityOfPrecipitation"]["value"],
+            "description": hour["shortForecast"],
+            "icon": hour["icon"],
+        }
+        for hour in next_3_hours
+    ]
+    return next_3_hours

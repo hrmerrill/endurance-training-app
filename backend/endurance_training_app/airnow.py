@@ -39,15 +39,10 @@ def get_aqi_data() -> Dict[str, Any]:
     # the response is a list of dictionairies by pollutant and date
     aqi_summaries = response.json()
 
-    # get today's forecast
+    # get today's forecast. Use the pollutant with the highest AQI
     today = datetime.today().strftime("%Y-%m-%d")
     aqi_today = [summary for summary in aqi_summaries if summary["DateForecast"] == today]
-    results = {}
-    results["o3_aqi"] = [
-        summary["AQI"] for summary in aqi_today if summary["ParameterName"] == "O3"
-    ][0]
-    results["pm_aqi"] = [
-        summary["AQI"] for summary in aqi_today if summary["ParameterName"] == "PM2.5"
-    ][0]
-    results["discussion"] = aqi_today[0]["Discussion"]
+    o3_today = [summary for summary in aqi_today if summary["ParameterName"] == "O3"][0]
+    pm_today = [summary for summary in aqi_today if summary["ParameterName"] == "PM2.5"][0]
+    results = o3_today if o3_today["AQI"] > pm_today["AQI"] else pm_today
     return results

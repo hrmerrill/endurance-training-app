@@ -8,7 +8,7 @@ This repo contains code for a web app that assists with endurance training. A us
 The home page displays three clickable widgets:
 1. Recommended workout: displays the recommended workout for today.
 2. Weather: displays the forecasted weather for the day.
-3. AQI: displays the current air quality index.
+3. AQI: displays the current and forecasted air quality index.
 
 On the homepage, the widgets display a short summary of information, and clicking each widget will take the user to a new view containing more details. Code for the frontend is in the `frontend` subdirectory.
 
