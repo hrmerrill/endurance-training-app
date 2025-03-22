@@ -7,15 +7,23 @@ AirNow API.
 
 import os
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import requests
+from endurance_training_app.display_utils import get_color_from_aqi
 from endurance_training_app.location_utils import get_location_from_ip
 
 
-def get_aqi_data() -> Dict[str, Any]:
+def get_aqi_data(lat: Optional[float] = None, lon: Optional[float] = None) -> Dict[str, Any]:
     """
     Get AQI data from the AirNow API.
+
+    Parameters
+    ----------
+    lat: float
+        latitude in degrees
+    lon: float
+        longitude in degrees
 
     Returns
     -------
@@ -25,11 +33,10 @@ def get_aqi_data() -> Dict[str, Any]:
     # get AirNow API key
     api_key = os.environ.get("AIRNOW_API_KEY")
 
-    # get the latitude and longitude from IP address
-    ip_data = get_location_from_ip()
-
-    # get FIPS code from location
-    lat, lon = ip_data["loc"].split(",")
+    if lat is None or lon is None:
+        # get the latitude and longitude from IP address
+        ip_data = get_location_from_ip()
+        lat, lon = ip_data["loc"].split(",")
 
     url = "https://www.airnowapi.org/aq/forecast/latLong/?format=application/json&"
     params = [f"latitude={lat}", f"longitude={lon}", f"API_KEY={api_key}"]
@@ -45,4 +52,6 @@ def get_aqi_data() -> Dict[str, Any]:
     o3_today = [summary for summary in aqi_today if summary["ParameterName"] == "O3"][0]
     pm_today = [summary for summary in aqi_today if summary["ParameterName"] == "PM2.5"][0]
     results = o3_today if o3_today["AQI"] > pm_today["AQI"] else pm_today
+    results["pill_color_hex"] = "#" + get_color_from_aqi(results["AQI"])
+    results["text_color_hex"] = "black" if results["AQI"] <= 100 else "white"
     return results

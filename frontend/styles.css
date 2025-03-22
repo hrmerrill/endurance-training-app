@@ -26,3 +26,15 @@ body {
 .widget h2 {
     margin-top: 0;
 }
+
+.pill {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    border-radius: 16px;
+  }

@@ -19,3 +19,6 @@ The backend Python server retrieves weather forecasts from the weather.gov API, 
   - `server.py` contains a server to serve up the data to the frontend.
   - `endurance_training_app` contains a python package with the modules required to run the server. The package and dependencies are managed by Poetry through the `pyproject.toml` file (which auto-generates the `poetry.lock` file).
 * `frontend` contains Javascript and CSS to create the web app.
+  - `styles.css` contains style definitions for objects in the web app.
+  - `index.html` contains the static contents and layout of the page.
+  - `app.js` contains the dynamic contents, loading data from the backend server.

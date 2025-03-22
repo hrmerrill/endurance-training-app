@@ -5,31 +5,35 @@ Description: This script contains functions for getting weather forecasts from t
 weather.gov API.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import requests
-from endurance_training_app.location_utils import get_fips_from_location, get_location_from_ip
+from endurance_training_app.location_utils import get_location_from_ip
 
 
-def get_weather_data() -> Dict[str, Any]:
+def get_weather_data(lat: Optional[float] = None, lon: Optional[float] = None) -> Dict[str, Any]:
     """
     Get weather forecasts from the weather.gov API for the user's location.
+
+    Parameters
+    ----------
+    lat: float
+        latitude in degrees
+    lon: float
+        longitude in degrees
 
     Returns
     -------
     Dict[str, Any]
         The json containing the hourly weather forecast.
     """
-
-    # get the latitude and longitude from IP address
-    ip_data = get_location_from_ip()
-
-    # get FIPS code from location
-    lat, lon = ip_data["loc"].split(",")
-    fips = get_fips_from_location(lat=float(lat), lon=float(lon))
+    if lat is None or lon is None:
+        # get the latitude and longitude from IP address
+        ip_data = get_location_from_ip()
+        lat, lon = ip_data["loc"].split(",")
 
     # look up the weather forecast endpoint for the given location
-    points_response = requests.get(f"https://api.weather.gov/points/{ip_data['loc']}")
+    points_response = requests.get(f"https://api.weather.gov/points/{lat},{lon}")
     points_endpoint = points_response.json()["properties"]["forecastHourly"]
 
     # now collect the weather forecast
