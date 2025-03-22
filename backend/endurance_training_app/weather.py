@@ -1,7 +1,7 @@
 """
 Author: Hunter R. Merrill
 
-Description: This script contains functions for gettin weather forecasts from the
+Description: This script contains functions for getting weather forecasts from the
 weather.gov API.
 """
 
@@ -11,7 +11,7 @@ import requests
 from endurance_training_app.location_utils import get_fips_from_location, get_location_from_ip
 
 
-def get_weather() -> Dict[str, Any]:
+def get_weather_data() -> Dict[str, Any]:
     """
     Get weather forecasts from the weather.gov API for the user's location.
 

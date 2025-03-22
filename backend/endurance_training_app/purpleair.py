@@ -1,9 +1,16 @@
+"""
+Author: Hunter R. Merrill
+
+Description: This script contains functions for getting recent AQI data from the
+PurpleAir API.
+"""
+
 import os
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
 import requests
-from endurance_training_app.location_utils import create_bounding_box
+from endurance_training_app.location_utils import create_bounding_box, get_location_from_ip
 
 
 def get_purpleair_sensor_data_in_box(lon: float, lat: float) -> List[Any]:
@@ -73,3 +80,24 @@ def get_purpleair_sensor_history(sensor_ids: List[Any]) -> List[Dict[str, Any]]:
         result.update({"sensor_index": int(sensor_id)})
         results.append(result)
     return results
+
+
+def get_purpleair_data() -> Dict[str, Any]:
+    """
+    Get recent AQI data from the PurpleAir API.
+
+    Returns
+    -------
+    Dict[str, Any]
+        The AQI data from the PurpleAir API.
+    """
+    # get the latitude and longitude from IP address
+    ip_data = get_location_from_ip()
+
+    # get the outdoor PurpleAir sensor IDs within a 5km bounding box
+    lat, lon = ip_data["loc"].split(",")
+    sensor_ids = get_purpleair_sensor_data_in_box(lon=float(lon), lat=float(lat))
+
+    # get the sensor history for the last 24 hours
+    sensor_history = get_purpleair_sensor_history(sensor_ids=sensor_ids)
+    return sensor_history
