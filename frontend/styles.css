@@ -14,6 +14,7 @@ body {
     gap: 20px;
 }
 
+/* Each widget shows info about workout, weather, or air quality */
 .widget {
     background-color: white;
     padding: 20px;
@@ -27,6 +28,7 @@ body {
     margin-top: 0;
 }
 
+/* This pill is used for standalone buttons with some information. */
 .pill {
     font-family: Arial, sans-serif;
     font-weight: bold;
@@ -37,4 +39,54 @@ body {
     display: inline-block;
     margin: 4px 2px;
     border-radius: 16px;
-  }
+    position: relative;
+}
+
+/* These styles are for overlapping, clickable pill buttons. The
+clicked button is placed on top. */
+.pill-tab-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pill-tab-row {
+    display: flex;
+    position: relative;
+}
+
+.pill-tab {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 16px;
+    margin: 0 5px; /* Adjust overlap */
+    cursor: pointer;
+    transition: transform 0.3s ease, z-index 0s; /* Add z-index transition */
+    border: none;
+}
+
+.pill-tab:first-child {
+    margin-left: 0;
+}
+
+.pill-tab:last-child {
+    margin-right: 0;
+}
+
+.pill-tab.top {
+    z-index: 2;
+    transform: translateY(-5px); /* Optional: Slightly raise the top pill */
+}
+
+.pill-tab:hover {
+    background-color: #e0e0e0;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+}
