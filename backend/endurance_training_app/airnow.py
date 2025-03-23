@@ -6,7 +6,7 @@ AirNow API.
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 import requests
@@ -49,8 +49,23 @@ def get_aqi_data(lat: Optional[float] = None, lon: Optional[float] = None) -> Di
     # get today's forecast. Use the pollutant with the highest AQI
     today = datetime.today().strftime("%Y-%m-%d")
     aqi_today = [summary for summary in aqi_summaries if summary["DateForecast"] == today]
-    o3_today = [summary for summary in aqi_today if summary["ParameterName"] == "O3"][0]
-    pm_today = [summary for summary in aqi_today if summary["ParameterName"] == "PM2.5"][0]
+
+    # sometimes all we get is tomorrow's.
+    if not aqi_today:
+        tomorrow = (datetime.today() + timedelta(days=1)).strftime("%Y-%m-%d")
+        aqi_today = [summary for summary in aqi_summaries if summary["DateForecast"] == tomorrow]
+
+    # in case a report is missing.
+    try:
+        o3_today = [summary for summary in aqi_today if summary["ParameterName"] == "O3"][0]
+    except IndexError:
+        o3_today = {"AQI": -1, "Category": {"Name": "Unavailable"}}
+
+    try:
+        pm_today = [summary for summary in aqi_today if summary["ParameterName"] == "PM2.5"][0]
+    except IndexError:
+        pm_today = {"AQI": -1, "Category": {"Name": "Unavailable"}}
+
     results = o3_today if o3_today["AQI"] > pm_today["AQI"] else pm_today
     results["pill_color_hex"] = "#" + get_color_from_aqi(results["AQI"])
     results["text_color_hex"] = "black" if results["AQI"] <= 100 else "white"

@@ -1,4 +1,5 @@
 COLOR_MAPPING = {
+    0: "d3d3d3",
     1: "00e400",
     2: "ffff00",
     3: "ff7e00",
@@ -22,6 +23,8 @@ def get_color_from_aqi(aqi: float) -> str:
     str
         The color in hex format.
     """
+    if aqi <= -0.1:
+        return COLOR_MAPPING[0]
     if aqi <= 50:
         return COLOR_MAPPING[1]
     elif aqi <= 100:

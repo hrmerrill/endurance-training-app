@@ -15,7 +15,7 @@ from endurance_training_app.display_utils import get_color_from_aqi
 from endurance_training_app.location_utils import create_bounding_box, get_location_from_ip
 
 
-def get_purpleair_sensor_data_in_box(lon: float, lat: float, limit: int = 3) -> List[Any]:
+def get_purpleair_sensor_data_in_box(lon: float, lat: float, limit: int = 5) -> List[Any]:
     """
     Get outdoor PurpleAir sensor IDs within a 5km bounding box with recent high confidence.
 
@@ -86,7 +86,7 @@ def get_purpleair_sensor_history(sensor_ids: List[Any]) -> List[Dict[str, Any]]:
         )
         result = purpleair_response.json()
         results.append(result)
-        sleep(0.25)
+        sleep(1)
 
     return results
 

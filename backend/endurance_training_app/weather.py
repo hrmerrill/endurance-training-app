@@ -40,15 +40,42 @@ def get_weather_data(lat: Optional[float] = None, lon: Optional[float] = None) -
     forecast_response = requests.get(points_endpoint)
     forecast_data = forecast_response.json()
 
-    # next three hours
-    next_3_hours = forecast_data["properties"]["periods"][:3]
-    next_3_hours = [
-        {
-            "temperature": hour["temperature"],
-            "rainfall_chance": hour["probabilityOfPrecipitation"]["value"],
-            "description": hour["shortForecast"],
-            "icon": hour["icon"],
-        }
-        for hour in next_3_hours
-    ]
-    return next_3_hours
+    # get summaries
+    min_temp_24_hrs = min(
+        [hour["temperature"] for hour in forecast_data["properties"]["periods"][:24]]
+    )
+    max_temp_24_hrs = max(
+        [hour["temperature"] for hour in forecast_data["properties"]["periods"][:24]]
+    )
+    min_temp_3_hrs = min(
+        [hour["temperature"] for hour in forecast_data["properties"]["periods"][:3]]
+    )
+    max_temp_3_hrs = max(
+        [hour["temperature"] for hour in forecast_data["properties"]["periods"][:3]]
+    )
+
+    max_chance_rain_24_hrs = max(
+        [
+            hour["probabilityOfPrecipitation"]["value"]
+            for hour in forecast_data["properties"]["periods"][:24]
+        ]
+    )
+    max_chance_rain_3_hrs = max(
+        [
+            hour["probabilityOfPrecipitation"]["value"]
+            for hour in forecast_data["properties"]["periods"][:3]
+        ]
+    )
+
+    weather = {
+        "min_temp_24_hrs": min_temp_24_hrs,
+        "max_temp_24_hrs": max_temp_24_hrs,
+        "max_chance_rain_24_hrs": max_chance_rain_24_hrs,
+        "max_chance_rain_3_hrs": max_chance_rain_3_hrs,
+        "min_temp_3_hrs": min_temp_3_hrs,
+        "max_temp_3_hrs": max_temp_3_hrs,
+        "description": forecast_data["properties"]["periods"][0]["shortForecast"]
+        .lower()
+        .capitalize(),
+    }
+    return weather
