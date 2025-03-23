@@ -60,6 +60,7 @@ function loadApp(url){
                     }
                 }
             });
+
             const ctx_rain = document.getElementById("rain-chart").getContext('2d');
             const rain_chart = new Chart(ctx_rain, {
                 type: "bar",
@@ -110,11 +111,25 @@ function loadApp(url){
             });
 
             // Populate AQI widget
-            const aqi = `AirNow Forecast: ${data.aqi.AQI}`;
+            const aqi = `AirNow forecast: ${data.aqi.AQI}`;
             document.getElementById("aqi-summary").innerText = aqi;
             document.getElementById("aqi-pill").style.background=data.aqi.pill_color_hex;
             document.getElementById("aqi-pill").style.color=data.aqi.text_color_hex;
             document.getElementById("aqi-pill").textContent = data.aqi.Category.Name;
+
+            tipping_point_button = document.getElementById("tipping-point-pill");
+            tipping_point_button.textContent = data.tipping_points.running;
+
+            // when clicking, cycle through tipping points
+            tipping_point_button.onclick = function() {
+                if(tipping_point_button.textContent.includes("Running")) {
+                    tipping_point_button.textContent = data.tipping_points.cycling;
+                } else if(tipping_point_button.textContent.includes("Cycling")) {
+                    tipping_point_button.textContent = data.tipping_points.walking;
+                } else {
+                    tipping_point_button.textContent = data.tipping_points.running;
+                }
+            }
 
             // Display PurpleAir data on the AQI widget
             const ctx_aqi = document.getElementById("aqi-chart").getContext('2d');

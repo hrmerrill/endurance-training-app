@@ -3,7 +3,13 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any, Dict, Optional
 
-from endurance_training_app import get_aqi_data, get_purpleair_data, get_weather_data
+import numpy as np
+from endurance_training_app import (
+    calculate_tipping_point,
+    get_aqi_data,
+    get_purpleair_data,
+    get_weather_data,
+)
 
 
 def get_all_data(lat: Optional[float] = None, lon: Optional[float] = None) -> Dict[str, Any]:
@@ -26,6 +32,21 @@ def get_all_data(lat: Optional[float] = None, lon: Optional[float] = None) -> Di
     data["aqi"] = get_aqi_data(lon=lon, lat=lat)
     data["purpleair"] = get_purpleair_data(lon=lon, lat=lat)
     data["weather"] = get_weather_data(lon=lon, lat=lat)
+
+    # use the maximum of the AirNow forecast and the average purpleair data to find tipping points
+    purpleair_avg_aqi = np.mean([[x["y"] for x in d["data"]] for d in data["purpleair"]])
+    aqi = max([data["aqi"]["AQI"], purpleair_avg_aqi])
+    data["tipping_points"] = {}
+    for activity in ["cycling", "walking", "running"]:
+        tipping_point_hrs = calculate_tipping_point(aqi, activity)
+        if tipping_point_hrs < 1:
+            data["tipping_points"][
+                activity
+            ] = f"{activity.capitalize()} tipping point: {tipping_point_hrs*60:.0f} mins"
+        else:
+            data["tipping_points"][
+                activity
+            ] = f"{activity.capitalize()} tipping point: {tipping_point_hrs:.1f} hrs"
     return data
 
 
