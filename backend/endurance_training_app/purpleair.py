@@ -47,7 +47,7 @@ def get_purpleair_sensor_data_in_box(lon: float, lat: float, limit: int = 5) -> 
     }
     purpleair_response = requests.get(url=url, params=params, headers=headers)
     confident_sensors = [
-        sensor[0] for sensor in purpleair_response.json()["data"] if sensor[1] >= 95
+        sensor[0] for sensor in purpleair_response.json()["data"] if sensor[1] >= 100
     ]
     if len(confident_sensors) > limit:
         return confident_sensors[:limit]

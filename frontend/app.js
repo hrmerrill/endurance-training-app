@@ -48,7 +48,17 @@ const week = Math.ceil(timeDelta / 1000 / 60 / 60 / 24 / 7);
 // Populate workout widget with today's workout
 distance = Math.trunc(weekly_distance_km[week] * daily_percentages[day_name] / 1.609 * 10) / 10;
 document.getElementById("workout-distance").innerText = `${distance} miles`;
-document.getElementById("workout-zone").innerText = daily_zone[day_name];
+
+zone = document.getElementById("workout-zone");
+zone.innerText = daily_zone[day_name];
+if (daily_zone[day_name] == "Rest"){
+    zone.style.background="rgb(255, 255, 255)";
+    zone.style.border="1px solid black";
+}
+if (daily_zone[day_name] == "Z2"){
+    zone.style.background="rgb(0, 128, 255)";
+    zone.style.color="rgb(255, 255, 255)"
+}
 
 // Show the PM strength widget on Tuesdays and Fridays
 if ((day_name == "Tuesday") || (day_name == "Friday")){
