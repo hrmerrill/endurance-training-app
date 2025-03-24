@@ -67,7 +67,16 @@ def get_weather_data(lat: Optional[float] = None, lon: Optional[float] = None) -
         ]
     )
 
+    # create some space, for visuals
+    if min_temp_3_hrs == max_temp_3_hrs:
+        max_temp_3_hrs = min_temp_3_hrs + 0.01 * (max_temp_24_hrs - min_temp_24_hrs)
+    if max_chance_rain_3_hrs == 0:
+        max_chance_rain_3_hrs = 1
+    if max_chance_rain_3_hrs == max_chance_rain_24_hrs:
+        max_chance_rain_24_hrs = min([max_chance_rain_3_hrs + 1, 100])
+
     weather = {
+        "current_temperature": forecast_data["properties"]["periods"][0]["temperature"],
         "min_temp_24_hrs": min_temp_24_hrs,
         "max_temp_24_hrs": max_temp_24_hrs,
         "max_chance_rain_24_hrs": max_chance_rain_24_hrs,

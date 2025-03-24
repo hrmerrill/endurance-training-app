@@ -12,7 +12,9 @@ from endurance_training_app import (
 )
 
 
-def get_all_data(lat: Optional[float] = None, lon: Optional[float] = None) -> Dict[str, Any]:
+def get_all_data(
+    lat: Optional[float] = None, lon: Optional[float] = None, subset: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Get all data from the current location for the web app.
 
@@ -22,6 +24,8 @@ def get_all_data(lat: Optional[float] = None, lon: Optional[float] = None) -> Di
         latitude in degrees
     lon: float
         longitude in degrees
+    subset: str
+        subset of data to return
 
     Returns
     -------
@@ -29,20 +33,29 @@ def get_all_data(lat: Optional[float] = None, lon: Optional[float] = None) -> Di
         The AirNow, PurpleAir, and weather forecast data for the current location.
     """
     data = {}
-    data["aqi"] = get_aqi_data(lon=lon, lat=lat)
-    data["purpleair"] = get_purpleair_data(lon=lon, lat=lat)
-    data["weather"] = get_weather_data(lon=lon, lat=lat)
+    if subset == "aqi":
+        data["aqi"] = get_aqi_data(lon=lon, lat=lat)
+        data["purpleair"] = get_purpleair_data(lon=lon, lat=lat)
+    elif subset == "weather":
+        data["weather"] = get_weather_data(lon=lon, lat=lat)
+    else:
+        data["aqi"] = get_aqi_data(lon=lon, lat=lat)
+        data["purpleair"] = get_purpleair_data(lon=lon, lat=lat)
+        data["weather"] = get_weather_data(lon=lon, lat=lat)
 
-    # use the maximum of the AirNow forecast and the average purpleair data to find tipping points
-    purpleair_avg_aqi = np.mean([np.mean([x["y"] for x in d["data"]]) for d in data["purpleair"]])
-    aqi = max([data["aqi"]["AQI"], purpleair_avg_aqi])
-    data["tipping_points"] = {}
-    for activity in ["cycling", "walking", "running"]:
-        tipping_point_hrs = calculate_tipping_point(aqi, activity)
-        if tipping_point_hrs < 1:
-            data["tipping_points"][activity] = f"{tipping_point_hrs*60:.0f} mins"
-        else:
-            data["tipping_points"][activity] = f"{tipping_point_hrs:.1f} hrs"
+    if subset is None or subset == "aqi":
+        # use the maximum of the AirNow forecast and the average purpleair data to find tipping points
+        purpleair_avg_aqi = np.mean(
+            [np.mean([x["y"] for x in d["data"]]) for d in data["purpleair"]]
+        )
+        aqi = max([data["aqi"]["AQI"], purpleair_avg_aqi])
+        data["tipping_points"] = {}
+        for activity in ["cycling", "walking", "running"]:
+            tipping_point_hrs = calculate_tipping_point(aqi, activity)
+            if tipping_point_hrs < 1:
+                data["tipping_points"][activity] = f"{tipping_point_hrs*60:.0f} mins"
+            else:
+                data["tipping_points"][activity] = f"{tipping_point_hrs:.1f} hrs"
     return data
 
 
@@ -56,12 +69,16 @@ class RequestHandler(BaseHTTPRequestHandler):
         if "lon" in query_params and "lat" in query_params:
             lon = float(query_params["lon"][0])
             lat = float(query_params["lat"][0])
+        if "subset" in query_params:
+            subset = query_params["subset"][0]
+        else:
+            subset = None
 
         self.send_response(200)
         self.send_header("Content-type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
-        data = get_all_data(lon=lon, lat=lat)
+        data = get_all_data(lon=lon, lat=lat, subset=subset)
         self.wfile.write(json.dumps(data).encode("utf-8"))
 
 

@@ -78,7 +78,6 @@ clicked button is placed on top. */
 
 .pill-tab.top {
     z-index: 2;
-    transform: translateY(-5px); /* Optional: Slightly raise the top pill */
 }
 
 .pill-tab:hover {

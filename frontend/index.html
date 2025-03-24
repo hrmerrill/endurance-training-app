@@ -9,13 +9,17 @@
 <body>
     <div id="app">
         <div class="widget" id="workout-widget">
-            <h2>Recommended Workout</h2>
-            <p id="workout-summary">Loading...</p>
+            <h2>Today's Workout</h2>
+            <button class="pill" id="workout-distance">Loading...</button>
+            <button class="pill" id="workout-zone">Loading...</button>
+            <button class="pill" id="strength" style="display:none;">PM strength</button>
         </div>
         <div class="widget" id="aqi-widget">
             <h2>Air Quality</h2>
             <button class="pill" id="aqi-pill">Loading...</button>
+            <p align="left" id="aqi_description" style="display:none;">The AQI above is a forecast from AirNow and is the maximum of the ozone and particulate matter AQI values. The chart below shows particulate matter AQI trends from nearby PurpleAir monitors over the last three hours.</p>
             <canvas id="aqi-chart"></canvas>
+            <p></p>
             <div class="pill-tab-container">
                 <div class="pill-tab-row">
                     <button class="pill-tab" id="tipping-point-pill-walk">
@@ -35,6 +39,7 @@
                     </button>
                 </div>
             </div>
+            <p align="left" id="tipping_point_description" style="display:none;">The "tipping points" above are the time it takes for the benefits of the activity to be outweighed by the harmful effects of air pollution.</p>
         </div>
         <div class="widget" id="weather-widget">
             <h2>Weather</h2>
