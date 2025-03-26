@@ -82,7 +82,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data).encode("utf-8"))
 
 
-def run(handler_class: BaseHTTPRequestHandler = RequestHandler, port: int = 5000) -> None:
+def run(handler_class: BaseHTTPRequestHandler = RequestHandler, port: int = 8000) -> None:
     """
     Run the server.
 

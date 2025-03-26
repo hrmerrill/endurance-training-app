@@ -303,23 +303,23 @@ function loadAQI(url){
 }
 
 // Load weather and just use location from IP address
-loadWeather("http://127.0.0.1:5000/?subset=weather");
+loadWeather("http://127.0.0.1:8000/?subset=weather");
 
 // For AQI we will try to get a more precise location from the browser
 async function locSuccessCallback(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
-    loadAQI(`http://127.0.0.1:5000/?lat=${lat}&lon=${lon}&subset=aqi`);
+    loadAQI(`http://127.0.0.1:8000/?lat=${lat}&lon=${lon}&subset=aqi`);
 }
 
 function locErrorCallback(position) {
-    loadAQI("http://127.0.0.1:5000/?subset=aqi");
+    loadAQI("http://127.0.0.1:8000/?subset=aqi");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(locSuccessCallback, locErrorCallback);
     } else {
-        loadAQI("http://127.0.0.1:5000?subset=aqi");
+        loadAQI("http://127.0.0.1:8000?subset=aqi");
     }
 });
