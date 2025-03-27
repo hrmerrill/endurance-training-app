@@ -75,14 +75,14 @@ class RequestHandler(BaseHTTPRequestHandler):
             subset = None
 
         self.send_response(200)
-        self.send_header("Content-type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Content-type", "application/json")
         self.end_headers()
         data = get_all_data(lon=lon, lat=lat, subset=subset)
         self.wfile.write(json.dumps(data).encode("utf-8"))
 
 
-def run(handler_class: BaseHTTPRequestHandler = RequestHandler, port: int = 5000) -> None:
+def run(handler_class: BaseHTTPRequestHandler = RequestHandler, port: int = 8000) -> None:
     """
     Run the server.
 
