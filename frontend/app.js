@@ -303,23 +303,23 @@ function loadAQI(url){
 }
 
 // Load weather and just use location from IP address
-loadWeather("http://127.0.0.1:8081/?subset=weather");
+loadWeather("http://raspberrypi.local:8081/?subset=weather");
 
 // For AQI we will try to get a more precise location from the browser
 async function locSuccessCallback(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
-    loadAQI(`http://127.0.0.1:8081/?lat=${lat}&lon=${lon}&subset=aqi`);
+    loadAQI(`http://raspberrypi.local:8081/?lat=${lat}&lon=${lon}&subset=aqi`);
 }
 
 function locErrorCallback(position) {
-    loadAQI("http://127.0.0.1:8081/?subset=aqi");
+    loadAQI("http://raspberrypi.local:8081/?subset=aqi");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(locSuccessCallback, locErrorCallback);
     } else {
-        loadAQI("http://127.0.0.1:8081?subset=aqi");
+        loadAQI("http://raspberrypi.local:8081?subset=aqi");
     }
 });
