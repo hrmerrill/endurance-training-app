@@ -281,7 +281,7 @@ function loadAQI(url){
                         x: {
                             title: {
                                 display: false,
-                                text: 'PurpleAir monitors near you-- last three hours',
+                                text: 'PurpleAir monitors near you-- last five hours',
                             },
                             ticks: {
                                 callback: function(val, index) {

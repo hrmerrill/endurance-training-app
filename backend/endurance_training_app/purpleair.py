@@ -69,12 +69,12 @@ def get_purpleair_sensor_history(sensor_ids: List[Any]) -> List[Dict[str, Any]]:
         A list of dictionaries containing sensor history.
     """
     now = datetime.now()
-    three_hours_ago = now - timedelta(hours=3)
+    five_hours_ago = now - timedelta(hours=3)
     url = "https://api.purpleair.com/v1/sensors/"
     headers = {"X-API-Key": os.environ.get("PURPLEAIR_API_KEY")}
     params = {
         "fields": "pm2.5_atm",
-        "start_timestamp": int(three_hours_ago.timestamp()),
+        "start_timestamp": int(five_hours_ago.timestamp()),
         "end_timestamp": int(now.timestamp()),
         "average": 10,  # seconds
     }
@@ -89,6 +89,38 @@ def get_purpleair_sensor_history(sensor_ids: List[Any]) -> List[Dict[str, Any]]:
         sleep(1)
 
     return results
+
+
+def apply_epa_correction(purpleair_aqi: float) -> float:
+    """
+    Convert raw PM2.5 concentrations to EPA AQI values.
+
+    PurpleAir returns raw concentration data, not an AQI as reported by the EPA, so this function is
+    required to perform the conversion.
+
+    Parameters
+    ----------
+    purpleair_aqi: float
+        the PM2.5 concentration returned by PurpleAir.
+
+    Returns
+    -------
+    float
+        the EPA AQI equivalent value.
+    """
+    if purpleair_aqi <= 9:
+        aqi = (50 - 0) / (9 - 0) * (purpleair_aqi - 0) + 0
+    elif 9.1 <= purpleair_aqi <= 35.4:
+        aqi = (100 - 51) / (35.4 - 9.1) * (purpleair_aqi - 9.1) + 51
+    elif 35.5 <= purpleair_aqi <= 55.4:
+        aqi = (150 - 101) / (55.4 - 35.5) * (purpleair_aqi - 35.5) + 101
+    elif 55.5 <= purpleair_aqi <= 125.4:
+        aqi = (200 - 151) / (125.4 - 55.5) * (purpleair_aqi - 55.5) + 151
+    elif 125.5 <= purpleair_aqi <= 225.4:
+        aqi = (300 - 201) / (225.4 - 125.5) * (purpleair_aqi - 125.5) + 201
+    else:
+        aqi = (500 - 301) / (325.4 - 225.5) * (purpleair_aqi - 225.5) + 301
+    return aqi
 
 
 def prepare_purpleair_history_for_chartjs(aqi_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -112,7 +144,10 @@ def prepare_purpleair_history_for_chartjs(aqi_data: List[Dict[str, Any]]) -> Lis
         else:
             sorted_data = sorted(sensor_data["data"], key=lambda x: x[0])
             plot_data = [
-                {"x": datetime.fromtimestamp(item[0]).strftime("%Y-%m-%d %H:%M:%S"), "y": item[1]}
+                {
+                    "x": datetime.fromtimestamp(item[0]).strftime("%Y-%m-%d %H:%M:%S"),
+                    "y": apply_epa_correction(item[1]),
+                }
                 for item in sorted_data
             ]
             chart_color_hex = get_color_from_aqi(max([d["y"] for d in plot_data]))
