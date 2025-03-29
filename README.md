@@ -3,8 +3,8 @@
 **Author**: Hunter R. Merrill
 
 <p float="left" align="middle">
-  <img src="resources/app_screenshot.png" width="200" height="400"/>
-  <img src="resources/app_screenshot_2.png" width="200" height="400"/> 
+  <img src="resources/app_screenshot.png" width="430" height="932"/>
+  <img src="resources/app_screenshot_2.png" width="430" height="932"/> 
 </p>
 
 ## Description
