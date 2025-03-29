@@ -2,7 +2,8 @@
 
 **Author**: Hunter R. Merrill
 
-![app screenshot](resources/app_screenshot.png) ![app screenshot 2](resources/app_screenshot_2.png)
+:-------------------------:|:-------------------------:
+![app screenshot](resources/app_screenshot.png) | ![app screenshot 2](resources/app_screenshot_2.png)
 
 ## Description
 This repo contains code for a web app that assists with endurance training. A user will typically view this app daily to obtain information and recommendations to assist with planning the day's exercises. Currently, the app is optimized to view in a browser on a mobile device, and is set up to be hosted from a raspberry pi on a local network.
