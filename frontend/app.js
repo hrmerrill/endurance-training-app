@@ -305,12 +305,12 @@ function loadAQI(url){
 // determine whether to fetch from localhost or raspberrypi
 let url;
 const hostname = window.location.hostname;
+console.log(`running on ${hostname}`);
 if (hostname === "raspberrypi"){
     url = "raspberrypi.local";
 } else {
     url = "localhost";
 }
-console.log(`running on ${url}`);
 
 // Load weather and just use location from IP address
 loadWeather(`http://${url}:8081/?subset=weather`);
