@@ -307,11 +307,10 @@ let url;
 const hostname = window.location.hostname;
 if (hostname === "raspberrypi"){
     url = "raspberrypi.local";
-    console.log("running on rpi");
 } else {
     url = "localhost";
-    console.log("running on localhost");
 }
+console.log(`running on ${url}`);
 
 // Load weather and just use location from IP address
 loadWeather(`http://${url}:8081/?subset=weather`);
