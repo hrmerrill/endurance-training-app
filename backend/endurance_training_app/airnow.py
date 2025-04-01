@@ -69,4 +69,7 @@ def get_aqi_data(lat: Optional[float] = None, lon: Optional[float] = None) -> Di
     results = o3_today if o3_today["AQI"] > pm_today["AQI"] else pm_today
     results["pill_color_hex"] = "#" + get_color_from_aqi(results["AQI"])
     results["text_color_hex"] = "black" if results["AQI"] <= 100 else "white"
+
+    # too much text in the discussion-- strip out two days' worth.
+    results["Discussion"] = "\r\n\r\n".join(results["Discussion"].split("\r\n\r\n")[:2])
     return results

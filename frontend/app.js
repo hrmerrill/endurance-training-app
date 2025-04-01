@@ -201,10 +201,20 @@ function loadAQI(url){
             aqi_pill.textContent = `${data.aqi.AQI} - ${data.aqi.Category.Name}`;
             aqi_pill.addEventListener('click', function() {
                 const aqi_text = document.getElementById("aqi_description");
+                const aqi_discussion = document.getElementById("aqi_discussion");
                 if (aqi_text.style.display === "none") {
                     aqi_text.style.display = "block";
+                    aqi_text.style.fontSize = "12px";
+                    aqi_text.style.color = "rgb(100, 100, 100)";
+
+                    aqi_discussion.style.display = "block";
+                    aqi_discussion.style.fontSize = "14px";
+                    aqi_discussion.style.color = "rgb(0, 0, 0)";
+                    aqi_discussion.style.whiteSpace = "pre-wrap";
+                    aqi_discussion.textContent = data.aqi.Discussion;
                 } else {
                     aqi_text.style.display = "none";
+                    aqi_discussion.style.display = "none";
                 }
                 });
 
@@ -252,6 +262,8 @@ function loadAQI(url){
                 const text = document.getElementById("tipping_point_description");
                 if (text.style.display === "none") {
                     text.style.display = "block";
+                    text.style.fontSize = "12px";
+                    text.style.color = "rgb(100, 100, 100)";
                 } else {
                     text.style.display = "none";
                 }
