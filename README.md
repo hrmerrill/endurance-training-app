@@ -21,6 +21,9 @@ The backend Python server retrieves weather forecasts from the weather.gov API, 
 
 ## For developers
 
+### Prerequisites
+You will need Python. You will also need API keys for [AirNow](https://docs.airnowapi.org/) and [PurpleAir](https://api.purpleair.com/) stored in the environment variables `AIRNOW_API_KEY` and `PURPLEAIR_API_KEY` (though the workout and weather widgets will work without these keys). For hosting the app on a Raspberry Pi, you just need a Pi that has been set up for SSH access (and if you have AirNow and PurpleAir API keys, put them on that machine, too).
+
 ### Local
 Clone the repo and install poetry, the required dependencies, and the backend package:
 ```bash
