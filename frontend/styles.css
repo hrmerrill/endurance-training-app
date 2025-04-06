@@ -41,6 +41,7 @@ body {
     margin: 4px 2px;
     border-radius: 16px;
     position: relative;
+    cursor: pointer;
 }
 
 /* These styles are for overlapping, clickable pill buttons. The
