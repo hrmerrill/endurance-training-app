@@ -35,7 +35,7 @@ const daily_zone = {
 }
 
 // Choose a starting date
-const start_date = new Date("2025-03-23");
+const start_date = new Date("2025-03-24");
 
 // Get today's date
 const today = new Date();
@@ -46,8 +46,9 @@ const timeDelta = today.getTime() - start_date.getTime();
 const week = Math.ceil(timeDelta / 1000 / 60 / 60 / 24 / 7);
 
 // Populate workout widget with today's workout
-distance = Math.trunc(weekly_distance_km[week] * daily_percentages[day_name] / 1.609 * 10) / 10;
-document.getElementById("workout-distance").innerText = `${distance} miles`;
+distance = Math.round(weekly_distance_km[week] * daily_percentages[day_name] / 1.609 * 10) / 10;
+distance_pill = document.getElementById("workout-distance");
+distance_pill.innerText = `${distance} miles`;
 
 zone = document.getElementById("workout-zone");
 zone.innerText = daily_zone[day_name];
@@ -72,6 +73,85 @@ if ((day_name == "Tuesday") || (day_name == "Friday")){
 if (day_name == "Monday"){
     document.getElementById("workout-distance").style.display="none";
 }
+
+// create a helper function to get the dates and distances for the program
+function getDistanceData(startDate) {
+    let currentDate = new Date(startDate);
+    const twelveWeeksInMs = 12 * 7 * 24 * 60 * 60 * 1000;
+    const endDate = new Date(currentDate.getTime() + twelveWeeksInMs);
+    const dates = [];
+    const distances = [];
+    const fill_colors = [];
+    
+    while (currentDate <= endDate) {
+      // Find out what week it is
+      current_delta = currentDate.getTime() - startDate.getTime();
+      current_week = Math.ceil(current_delta / 1000 / 60 / 60 / 24 / 7);
+      current_day_name = currentDate.toLocaleDateString("en-US", { weekday: 'long' });
+      distance = weekly_distance_km[current_week] * daily_percentages[current_day_name] / 1.609;
+      distances.push(distance);
+
+      if (currentDate >= today) {
+        color = "rgb(0, 128, 255)";
+      } else {
+        color = "rgb(200, 200, 200)";
+      }
+      
+      fill_colors.push(color);
+
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    return [dates, distances, fill_colors];
+  }
+
+// now create a chart that shows the daily distance for the duration of the program
+const distance_canvas = document.getElementById("distance-chart");
+let distance_chart;
+
+// display the chart if clicked
+distance_pill.addEventListener('click', function() {
+    if (!distance_chart) {
+        const [dates, distances, fill_colors] = getDistanceData(start_date);
+        distance_chart = new Chart(distance_canvas.getContext('2d'), {
+            type: "bar",
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: "Daily distance (miles)",
+                    data: distances,
+                    borderColor: "none",
+                    backgroundColor: fill_colors,
+                }],
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: false,
+                        },
+                        ticks: {
+                            callback: function(val, index) {
+                                return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
+                            },
+                        }
+                    }
+                }
+            }
+        });
+        distance_canvas.style.display = "block";
+    } else {
+        distance_chart.destroy();
+        distance_chart = null;
+        distance_canvas.style.display = "none";
+    }
+});
 
 function loadWeather(url){
     fetch(url)
