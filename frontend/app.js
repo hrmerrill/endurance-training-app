@@ -1,5 +1,5 @@
 // Three increasing weeks and one decreasing week, increasing overall for 12 weeks
-const weekly_distance_km = {
+const weeklyDistanceKm = {
     1: 28,
     2: 32,
     3: 36,
@@ -15,7 +15,7 @@ const weekly_distance_km = {
 }
 
 // Modulate intensity and percentage of weekly volume
-const daily_percentages = {
+const dailyPercentages = {
     "Monday": 0.0,
     "Tuesday": 0.1,
     "Wednesday": 0.25, 
@@ -24,7 +24,7 @@ const daily_percentages = {
     "Saturday": 0.15,
     "Sunday": 0.3,
 }
-const daily_zone = {
+const dailyZone = {
     "Monday": "Rest",
     "Tuesday": "Z2",
     "Wednesday": "Z1", 
@@ -35,42 +35,42 @@ const daily_zone = {
 }
 
 // Choose a starting date
-const start_date = new Date("2025-03-24");
+const startDate = new Date("2025-03-24");
 
 // Get today's date
 const today = new Date();
-day_name = today.toLocaleDateString("en-US", { weekday: 'long' });
+dayName = today.toLocaleDateString("en-US", { weekday: 'long' });
 
 // Find out what week it is
-const timeDelta = today.getTime() - start_date.getTime();
+const timeDelta = today.getTime() - startDate.getTime();
 const week = Math.ceil(timeDelta / 1000 / 60 / 60 / 24 / 7);
 
 // Populate workout widget with today's workout
-distance = Math.round(weekly_distance_km[week] * daily_percentages[day_name] / 1.609 * 10) / 10;
-distance_pill = document.getElementById("workout-distance");
-distance_pill.innerText = `${distance} miles`;
+distance = Math.round(weeklyDistanceKm[week] * dailyPercentages[dayName] / 1.609 * 10) / 10;
+distancePill = document.getElementById("workout-distance");
+distancePill.innerText = `${distance} miles`;
 
 zone = document.getElementById("workout-zone");
-zone.innerText = daily_zone[day_name];
-if (daily_zone[day_name] == "Rest"){
+zone.innerText = dailyZone[dayName];
+if (dailyZone[dayName] == "Rest"){
     zone.style.background="rgb(255, 255, 255)";
     zone.style.border="1px solid black";
 }
-if (daily_zone[day_name] == "Z2"){
+if (dailyZone[dayName] == "Z2"){
     zone.style.background="rgb(0, 128, 255)";
     zone.style.color="rgb(255, 255, 255)"
 }
 
 // Show the PM strength widget on Tuesdays and Fridays
-if ((day_name == "Tuesday") || (day_name == "Friday")){
-    strength_pill = document.getElementById("strength");
-    strength_pill.style.display="inline-block";
-    strength_pill.style.background="rgb(0, 0, 0)";
-    strength_pill.style.color="rgb(255, 255, 255)";
+if ((dayName == "Tuesday") || (dayName == "Friday")){
+    strengthPill = document.getElementById("strength");
+    strengthPill.style.display="inline-block";
+    strengthPill.style.background="rgb(0, 0, 0)";
+    strengthPill.style.color="rgb(255, 255, 255)";
 }
 
 // If rest day, don't show distance
-if (day_name == "Monday"){
+if (dayName == "Monday"){
     document.getElementById("workout-distance").style.display="none";
 }
 
@@ -81,14 +81,14 @@ function getDistanceData(startDate) {
     const endDate = new Date(currentDate.getTime() + twelveWeeksInMs);
     const dates = [];
     const distances = [];
-    const fill_colors = [];
+    const fillColors = [];
     
     while (currentDate <= endDate) {
       // Find out what week it is
-      let current_delta = currentDate.getTime() - startDate.getTime();
-      let current_week = Math.ceil(current_delta / 1000 / 60 / 60 / 24 / 7);
-      let current_day_name = currentDate.toLocaleDateString("en-US", { weekday: 'long' });
-      let distance = weekly_distance_km[current_week] * daily_percentages[current_day_name] / 1.609;
+      let currentDelta = currentDate.getTime() - startDate.getTime();
+      let currentWeek = Math.ceil(currentDelta / 1000 / 60 / 60 / 24 / 7);
+      let currentDayName = currentDate.toLocaleDateString("en-US", { weekday: 'long' });
+      let distance = weeklyDistanceKm[currentWeek] * dailyPercentages[currentDayName] / 1.609;
       distances.push(distance);
 
       let color;
@@ -98,44 +98,44 @@ function getDistanceData(startDate) {
         color = "rgb(200, 200, 200)";
       }
       
-      fill_colors.push(color);
+      fillColors.push(color);
 
       dates.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    return [dates, distances, fill_colors];
+    return [dates, distances, fillColors];
   }
 
 // now create a chart that shows the daily distance for the duration of the program
-const distance_canvas = document.getElementById("distance-chart");
-let distance_chart;
+const distanceCanvas = document.getElementById("distance-chart");
+let distanceChart;
 let label;
-let y_values;
-var chart_type = "none";
-const minute_per_mile = 12.5;
+let yValues;
+var chartType = "none";
+const minutePerMile = 12.5;
 
 // display the chart if clicked
-distance_pill.addEventListener('click', function() {
-    const [dates, distances, fill_colors] = getDistanceData(start_date);
-    if (chart_type == "distance") {
+distancePill.addEventListener('click', function() {
+    const [dates, distances, fillColors] = getDistanceData(startDate);
+    if (chartType == "distance") {
         label = "Distance (miles)";
-        y_values = distances;
-    } else if (chart_type == "time") {
+        yValues = distances;
+    } else if (chartType == "time") {
         label = "Time (minutes)";
-        y_values = distances.map(x => x * minute_per_mile);
+        yValues = distances.map(x => x * minutePerMile);
     }
-    if (distance_chart) {
-        distance_chart.destroy();
+    if (distanceChart) {
+        distanceChart.destroy();
     }
-    distance_chart = new Chart(distance_canvas.getContext('2d'), {
+    distanceChart = new Chart(distanceCanvas.getContext('2d'), {
         type: "bar",
         data: {
             labels: dates,
             datasets: [{
                 label: label,
-                data: y_values,
+                data: yValues,
                 borderColor: "none",
-                backgroundColor: fill_colors,
+                backgroundColor: fillColors,
             }],
         },
         options: {
@@ -166,15 +166,15 @@ distance_pill.addEventListener('click', function() {
         }
     });
     // cycle through distance, time, and no chart
-    if (chart_type == "none") {
-        distance_canvas.style.display = "block";
-        chart_type = "distance";
-    } else if (chart_type == "distance") {
-        distance_canvas.style.display = "block";
-        chart_type = "time";
+    if (chartType == "none") {
+        distanceCanvas.style.display = "block";
+        chartType = "distance";
+    } else if (chartType == "distance") {
+        distanceCanvas.style.display = "block";
+        chartType = "time";
     } else {
-        distance_canvas.style.display = "none";
-        chart_type = "none";
+        distanceCanvas.style.display = "none";
+        chartType = "none";
     }
 });
 
@@ -188,8 +188,8 @@ function loadWeather(url){
             document.getElementById("weather-summary").innerText = `${data.weather.current_temperature}°F - ${data.weather.description}`;
 
             // Display the weather charts
-            const ctx_temperature = document.getElementById("temperature-chart").getContext('2d');
-            const temperature_chart = new Chart(ctx_temperature, {
+            const ctxTemperature = document.getElementById("temperature-chart").getContext('2d');
+            const temperatureChart = new Chart(ctxTemperature, {
                 type: "bar",
                 data: {
                     labels: ["temperature"],
@@ -238,8 +238,8 @@ function loadWeather(url){
                 }
             });
 
-            const ctx_rain = document.getElementById("rain-chart").getContext('2d');
-            const rain_chart = new Chart(ctx_rain, {
+            const ctxRain = document.getElementById("rain-chart").getContext('2d');
+            const rainChart = new Chart(ctxRain, {
                 type: "bar",
                 data: {
                     labels: ["rain"],
@@ -300,40 +300,40 @@ function loadAQI(url){
             Chart.defaults.font.family = "Arial";
 
             // Populate AQI widget
-            aqi_pill = document.getElementById("aqi-pill")
-            aqi_pill.style.background=data.aqi.pill_color_hex;
-            aqi_pill.style.color=data.aqi.text_color_hex;
-            aqi_pill.textContent = `${data.aqi.AQI} - ${data.aqi.Category.Name}`;
-            aqi_pill.addEventListener('click', function() {
-                const aqi_text = document.getElementById("aqi_description");
-                const aqi_discussion = document.getElementById("aqi_discussion");
-                if (aqi_text.style.display === "none") {
-                    aqi_text.style.display = "block";
-                    aqi_text.style.fontSize = "12px";
-                    aqi_text.style.color = "rgb(100, 100, 100)";
+            aqiPill = document.getElementById("aqi-pill")
+            aqiPill.style.background=data.aqi.pill_color_hex;
+            aqiPill.style.color=data.aqi.text_color_hex;
+            aqiPill.textContent = `${data.aqi.AQI} - ${data.aqi.Category.Name}`;
+            aqiPill.addEventListener('click', function() {
+                const aqiText = document.getElementById("aqi-description");
+                const aqiDiscussion = document.getElementById("aqi-discussion");
+                if (aqiText.style.display === "none") {
+                    aqiText.style.display = "block";
+                    aqiText.style.fontSize = "12px";
+                    aqiText.style.color = "rgb(100, 100, 100)";
 
-                    aqi_discussion.style.display = "block";
-                    aqi_discussion.style.fontSize = "14px";
-                    aqi_discussion.style.color = "rgb(0, 0, 0)";
-                    aqi_discussion.style.whiteSpace = "pre-wrap";
-                    aqi_discussion.textContent = data.aqi.Discussion;
+                    aqiDiscussion.style.display = "block";
+                    aqiDiscussion.style.fontSize = "14px";
+                    aqiDiscussion.style.color = "rgb(0, 0, 0)";
+                    aqiDiscussion.style.whiteSpace = "pre-wrap";
+                    aqiDiscussion.textContent = data.aqi.Discussion;
                 } else {
-                    aqi_text.style.display = "none";
-                    aqi_discussion.style.display = "none";
+                    aqiText.style.display = "none";
+                    aqiDiscussion.style.display = "none";
                 }
                 });
 
-            tipping_point_run = document.getElementById("tipping-point-pill-run");
-            tipping_point_bike = document.getElementById("tipping-point-pill-bike");
-            tipping_point_walk = document.getElementById("tipping-point-pill-walk");
+            tippingPointRun = document.getElementById("tipping-point-pill-run");
+            tippingPointBike = document.getElementById("tipping-point-pill-bike");
+            tippingPointWalk = document.getElementById("tipping-point-pill-walk");
 
-            tipping_point_run.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" fill="currentColor" class="icon" viewBox="0 0 448 512">
+            tippingPointRun.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" fill="currentColor" class="icon" viewBox="0 0 448 512">
                             <path d="M320 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM125.7 175.5c9.9-9.9 23.4-15.5 37.5-15.5c1.9 0 3.8 .1 5.6 .3L137.6 254c-9.3 28 1.7 58.8 26.8 74.5l86.2 53.9-25.4 88.8c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l28.7-100.4c5.9-20.6-2.6-42.6-20.7-53.9L238 299l30.9-82.4 5.1 12.3C289 264.7 323.9 288 362.7 288l21.3 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-21.3 0c-12.9 0-24.6-7.8-29.5-19.7l-6.3-15c-14.6-35.1-44.1-61.9-80.5-73.1l-48.7-15c-11.1-3.4-22.7-5.2-34.4-5.2c-31 0-60.8 12.3-82.7 34.3L57.4 153.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l23.1-23.1zM91.2 352L32 352c-17.7 0-32 14.3-32 32s14.3 32 32 32l69.6 0c19 0 36.2-11.2 43.9-28.5L157 361.6l-9.5-6c-17.5-10.9-30.5-26.8-37.9-44.9L91.2 352z"/>
                         </svg> ${data.tipping_points.running}`;
-            tipping_point_bike.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" fill="currentColor" class="icon" viewBox="0 0 640 512">
+            tippingPointBike.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" fill="currentColor" class="icon" viewBox="0 0 640 512">
                             <path d="M400 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm27.2 64l-61.8-48.8c-17.3-13.6-41.7-13.8-59.1-.3l-83.1 64.2c-30.7 23.8-28.5 70.8 4.3 91.6L288 305.1 288 416c0 17.7 14.3 32 32 32s32-14.3 32-32l0-128c0-10.7-5.3-20.7-14.2-26.6L295 232.9l60.3-48.5L396 217c5.7 4.5 12.7 7 20 7l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-52.8 0zM56 384a72 72 0 1 1 144 0A72 72 0 1 1 56 384zm200 0A128 128 0 1 0 0 384a128 128 0 1 0 256 0zm184 0a72 72 0 1 1 144 0 72 72 0 1 1 -144 0zm200 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z"/>                      
                         </svg> ${data.tipping_points.cycling}`;
-            tipping_point_walk.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" fill="currentColor" class="icon" viewBox="0 0 448 512">
+            tippingPointWalk.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" fill="currentColor" class="icon" viewBox="0 0 448 512">
                             <path d="M160 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM126.5 199.3c-1 .4-1.9 .8-2.9 1.2l-8 3.5c-16.4 7.3-29 21.2-34.7 38.2l-2.6 7.8c-5.6 16.8-23.7 25.8-40.5 20.2s-25.8-23.7-20.2-40.5l2.6-7.8c11.4-34.1 36.6-61.9 69.4-76.5l8-3.5c20.8-9.2 43.3-14 66.1-14c44.6 0 84.8 26.8 101.9 67.9L281 232.7l21.4 10.7c15.8 7.9 22.2 27.1 14.3 42.9s-27.1 22.2-42.9 14.3L247 287.3c-10.3-5.2-18.4-13.8-22.8-24.5l-9.6-23-19.3 65.5 49.5 54c5.4 5.9 9.2 13 11.2 20.8l23 92.1c4.3 17.1-6.1 34.5-23.3 38.8s-34.5-6.1-38.8-23.3l-22-88.1-70.7-77.1c-14.8-16.1-20.3-38.6-14.7-59.7l16.9-63.5zM68.7 398l25-62.4c2.1 3 4.5 5.8 7 8.6l40.7 44.4-14.5 36.2c-2.4 6-6 11.5-10.6 16.1L54.6 502.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L68.7 398z"/>
                       </svg> ${data.tipping_points.walking}`;
 
@@ -364,7 +364,7 @@ function loadAQI(url){
                 })
 
                 // display the description if clicked
-                const text = document.getElementById("tipping_point_description");
+                const text = document.getElementById("tipping-point-description");
                 if (text.style.display === "none") {
                     text.style.display = "block";
                     text.style.fontSize = "12px";
@@ -376,8 +376,8 @@ function loadAQI(url){
             });
 
             // Display PurpleAir data on the AQI widget
-            const ctx_aqi = document.getElementById("aqi-chart").getContext('2d');
-            const aqi_chart = new Chart(ctx_aqi, {
+            const ctxAqi = document.getElementById("aqi-chart").getContext('2d');
+            const aqiChart = new Chart(ctxAqi, {
                 type: 'line',
                 data: {
                     datasets: data.purpleair
