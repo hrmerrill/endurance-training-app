@@ -431,8 +431,14 @@ function loadAQI(url){
 let url;
 const hostname = window.location.hostname;
 console.log(`running on ${hostname}`);
+
+// if it's running on my raspberry pi, url is the hostname
 if (hostname === "raspberrypi.local"){
-    url = "raspberrypi.local";
+    url = hostname;
+// if it's running on a website, url is the hostname
+} else if (hostname.includes(".com")) {
+    url = hostname;
+// otherwise, attempt to use localhost
 } else {
     url = "localhost";
 }
