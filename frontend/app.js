@@ -108,48 +108,72 @@ function getDistanceData(startDate) {
 // now create a chart that shows the daily distance for the duration of the program
 const distance_canvas = document.getElementById("distance-chart");
 let distance_chart;
+let label;
+let y_values;
+var chart_type = "none";
+const minute_per_mile = 12.5;
 
 // display the chart if clicked
 distance_pill.addEventListener('click', function() {
-    if (!distance_chart) {
-        const [dates, distances, fill_colors] = getDistanceData(start_date);
-        distance_chart = new Chart(distance_canvas.getContext('2d'), {
-            type: "bar",
-            data: {
-                labels: dates,
-                datasets: [{
-                    label: "Daily distance (miles)",
-                    data: distances,
-                    borderColor: "none",
-                    backgroundColor: fill_colors,
-                }],
+    const [dates, distances, fill_colors] = getDistanceData(start_date);
+    if (chart_type == "distance") {
+        label = "Distance (miles)";
+        y_values = distances;
+    } else if (chart_type == "time") {
+        label = "Time (minutes)";
+        y_values = distances.map(x => x * minute_per_mile);
+    }
+    if (distance_chart) {
+        distance_chart.destroy();
+    }
+    distance_chart = new Chart(distance_canvas.getContext('2d'), {
+        type: "bar",
+        data: {
+            labels: dates,
+            datasets: [{
+                label: label,
+                data: y_values,
+                borderColor: "none",
+                backgroundColor: fill_colors,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: label,
+                    },
                 },
-                scales: {
-                    x: {
-                        title: {
-                            display: false,
+                x: {
+                    title: {
+                        display: false,
+                    },
+                    ticks: {
+                        callback: function(val, index) {
+                            return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
                         },
-                        ticks: {
-                            callback: function(val, index) {
-                                return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
-                            },
-                        }
                     }
                 }
             }
-        });
+        }
+    });
+    // cycle through distance, time, and no chart
+    if (chart_type == "none") {
         distance_canvas.style.display = "block";
+        chart_type = "distance";
+    } else if (chart_type == "distance") {
+        distance_canvas.style.display = "block";
+        chart_type = "time";
     } else {
-        distance_chart.destroy();
-        distance_chart = null;
         distance_canvas.style.display = "none";
+        chart_type = "none";
     }
 });
 
