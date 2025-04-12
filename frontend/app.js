@@ -85,12 +85,13 @@ function getDistanceData(startDate) {
     
     while (currentDate <= endDate) {
       // Find out what week it is
-      current_delta = currentDate.getTime() - startDate.getTime();
-      current_week = Math.ceil(current_delta / 1000 / 60 / 60 / 24 / 7);
-      current_day_name = currentDate.toLocaleDateString("en-US", { weekday: 'long' });
-      distance = weekly_distance_km[current_week] * daily_percentages[current_day_name] / 1.609;
+      let current_delta = currentDate.getTime() - startDate.getTime();
+      let current_week = Math.ceil(current_delta / 1000 / 60 / 60 / 24 / 7);
+      let current_day_name = currentDate.toLocaleDateString("en-US", { weekday: 'long' });
+      let distance = weekly_distance_km[current_week] * daily_percentages[current_day_name] / 1.609;
       distances.push(distance);
 
+      let color;
       if (currentDate >= today) {
         color = "rgb(0, 128, 255)";
       } else {
