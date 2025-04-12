@@ -113,10 +113,25 @@ let label;
 let yValues;
 var chartType = "none";
 const minutePerMile = 12.5;
+const [dates, distances, fillColors] = getDistanceData(startDate);
 
 // display the chart if clicked
 distancePill.addEventListener('click', function() {
-    const [dates, distances, fillColors] = getDistanceData(startDate);
+    // destroy chart if it currently exists
+    if (distanceChart) {
+        distanceChart.destroy();
+    }
+
+    // cycle through distance, time, and no chart for each click
+    if (chartType == "none") {
+        chartType = "distance";
+    } else if (chartType == "distance") {
+        chartType = "time";
+    } else {
+        chartType = "none";
+    }
+
+    // depending on chart type, edit the data and labels
     if (chartType == "distance") {
         label = "Distance (miles)";
         yValues = distances;
@@ -124,57 +139,50 @@ distancePill.addEventListener('click', function() {
         label = "Time (minutes)";
         yValues = distances.map(x => x * minutePerMile);
     }
-    if (distanceChart) {
-        distanceChart.destroy();
-    }
-    distanceChart = new Chart(distanceCanvas.getContext('2d'), {
-        type: "bar",
-        data: {
-            labels: dates,
-            datasets: [{
-                label: label,
-                data: yValues,
-                borderColor: "none",
-                backgroundColor: fillColors,
-            }],
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
+
+    // show it if it should be showed
+    if (chartType == "none") {
+        distanceCanvas.style.display = "none";
+    } else {
+        distanceCanvas.style.display = "block";
+        distanceChart = new Chart(distanceCanvas.getContext('2d'), {
+            type: "bar",
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: label,
+                    data: yValues,
+                    borderColor: "none",
+                    backgroundColor: fillColors,
+                }],
             },
-            scales: {
-                y: {
-                    title: {
-                        display: true,
-                        text: label,
-                    },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 },
-                x: {
-                    title: {
-                        display: false,
-                    },
-                    ticks: {
-                        callback: function(val, index) {
-                            return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: label,
                         },
+                    },
+                    x: {
+                        title: {
+                            display: false,
+                        },
+                        ticks: {
+                            callback: function(val, index) {
+                                return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
+                            },
+                        }
                     }
                 }
             }
-        }
-    });
-    // cycle through distance, time, and no chart
-    if (chartType == "none") {
-        distanceCanvas.style.display = "block";
-        chartType = "distance";
-    } else if (chartType == "distance") {
-        distanceCanvas.style.display = "block";
-        chartType = "time";
-    } else {
-        distanceCanvas.style.display = "none";
-        chartType = "none";
+        });
     }
 });
 
