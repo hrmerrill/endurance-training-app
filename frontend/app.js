@@ -429,6 +429,7 @@ function loadAQI(url){
 
 // determine whether to fetch from localhost or raspberrypi
 let url;
+var transferProtocol = window.location.protocol;
 const hostname = window.location.hostname;
 console.log(`running on ${hostname}`);
 
@@ -441,26 +442,27 @@ if (hostname === "raspberrypi.local"){
 // otherwise, attempt to use localhost
 } else {
     url = "localhost";
+    transferProtocol = "http:";
 }
 
 // Load weather and just use location from IP address
-loadWeather(`http://${url}:8081/?subset=weather`);
+loadWeather(`${transferProtocol}//${url}:8081/?subset=weather`);
 
 // For AQI we will try to get a more precise location from the browser
 async function locSuccessCallback(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
-    loadAQI(`http://${url}:8081/?lat=${lat}&lon=${lon}&subset=aqi`);
+    loadAQI(`${transferProtocol}//${url}:8081/?lat=${lat}&lon=${lon}&subset=aqi`);
 }
 
 function locErrorCallback(position) {
-    loadAQI(`http://${url}:8081/?subset=aqi`);
+    loadAQI(`${transferProtocol}//${url}:8081/?subset=aqi`);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(locSuccessCallback, locErrorCallback);
     } else {
-        loadAQI(`http://${url}:8081?subset=aqi`);
+        loadAQI(`${transferProtocol}//${url}:8081?subset=aqi`);
     }
 });
