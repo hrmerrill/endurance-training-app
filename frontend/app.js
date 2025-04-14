@@ -427,34 +427,45 @@ function loadAQI(url){
         });
 }
 
-// determine whether to fetch from localhost or raspberrypi
+// determine whether to fetch from localhost, raspberrypi, or AWS
 let url;
+let port = "";
+var transferProtocol = window.location.protocol;
 const hostname = window.location.hostname;
 console.log(`running on ${hostname}`);
+
+// if it's running on my raspberry pi, url is the hostname
 if (hostname === "raspberrypi.local"){
-    url = "raspberrypi.local";
+    url = hostname;
+    port = ":8081";
+// if it's running on my website
+} else if (hostname.includes(".com")) {
+    url = `api.${hostname}`;
+// otherwise, attempt to use localhost
 } else {
     url = "localhost";
+    transferProtocol = "http:";
+    port = ":8081";
 }
 
-// Load weather and just use location from IP address
-loadWeather(`http://${url}:8081/?subset=weather`);
-
-// For AQI we will try to get a more precise location from the browser
+// We will try to get a more precise location from the browser
 async function locSuccessCallback(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
-    loadAQI(`http://${url}:8081/?lat=${lat}&lon=${lon}&subset=aqi`);
+    loadWeather(`${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=weather`);
+    loadAQI(`${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`);
 }
 
 function locErrorCallback(position) {
-    loadAQI(`http://${url}:8081/?subset=aqi`);
+    loadWeather(`${transferProtocol}//${url}${port}/?subset=weather`);
+    loadAQI(`${transferProtocol}//${url}${port}/?subset=aqi`);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(locSuccessCallback, locErrorCallback);
     } else {
-        loadAQI(`http://${url}:8081?subset=aqi`);
+        loadWeather(`${transferProtocol}//${url}${port}/?subset=weather`);
+        loadAQI(`${transferProtocol}//${url}${port}?subset=aqi`);
     }
 });

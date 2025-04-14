@@ -1,3 +1,4 @@
+import argparse
 import json
 import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -100,4 +101,12 @@ def run(handler_class: BaseHTTPRequestHandler = RequestHandler, port: int = 8081
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser(description="Run the server.")
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8081,
+        help="Port on which to run the server (default: 8081)",
+    )
+    args = parser.parse_args()
+    run(port=args.port)
