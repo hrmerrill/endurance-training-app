@@ -36,20 +36,25 @@ def get_all_data(
     data = {}
     if subset == "aqi":
         data["aqi"] = get_aqi_data(lon=lon, lat=lat)
+        aqi = data["aqi"]["AQI"]
+    elif subset == "purpleair":
         data["purpleair"] = get_purpleair_data(lon=lon, lat=lat)
+        aqi = np.mean([np.mean([x["y"] for x in d["data"]]) for d in data["purpleair"]])
     elif subset == "weather":
         data["weather"] = get_weather_data(lon=lon, lat=lat)
+        aqi = None
     else:
         data["aqi"] = get_aqi_data(lon=lon, lat=lat)
         data["purpleair"] = get_purpleair_data(lon=lon, lat=lat)
         data["weather"] = get_weather_data(lon=lon, lat=lat)
 
-    if subset is None or subset == "aqi":
         # use the maximum of the AirNow forecast and the average purpleair data to find tipping points
         purpleair_avg_aqi = np.mean(
             [np.mean([x["y"] for x in d["data"]]) for d in data["purpleair"]]
         )
         aqi = max([data["aqi"]["AQI"], purpleair_avg_aqi])
+
+    if aqi is not None:
         data["tipping_points"] = {}
         for activity in ["cycling", "walking", "running"]:
             tipping_point_hrs = calculate_tipping_point(aqi, activity)

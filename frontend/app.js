@@ -116,74 +116,77 @@ const minutePerMile = 12.5;
 const [dates, distances, fillColors] = getDistanceData(startDate);
 
 // display the chart if clicked
-distancePill.addEventListener('click', function() {
-    // destroy chart if it currently exists
-    if (distanceChart) {
-        distanceChart.destroy();
-    }
+const distancePills = document.querySelectorAll("#workout-distance, #workout-zone");
+distancePills.forEach(distancePill => {
+    distancePill.addEventListener('click', function() {
+        // destroy chart if it currently exists
+        if (distanceChart) {
+            distanceChart.destroy();
+        }
 
-    // cycle through distance, time, and no chart for each click
-    if (chartType == "none") {
-        chartType = "distance";
-    } else if (chartType == "distance") {
-        chartType = "time";
-    } else {
-        chartType = "none";
-    }
+        // cycle through distance, time, and no chart for each click
+        if (chartType == "none") {
+            chartType = "distance";
+        } else if (chartType == "distance") {
+            chartType = "time";
+        } else {
+            chartType = "none";
+        }
 
-    // depending on chart type, edit the data and labels
-    if (chartType == "distance") {
-        label = "Distance (miles)";
-        yValues = distances;
-    } else if (chartType == "time") {
-        label = "Time (minutes)";
-        yValues = distances.map(x => x * minutePerMile);
-    }
+        // depending on chart type, edit the data and labels
+        if (chartType == "distance") {
+            label = "Distance (miles)";
+            yValues = distances;
+        } else if (chartType == "time") {
+            label = "Time (minutes)";
+            yValues = distances.map(x => x * minutePerMile);
+        }
 
-    // show it if it should be showed
-    if (chartType == "none") {
-        distanceCanvas.style.display = "none";
-    } else {
-        distanceCanvas.style.display = "block";
-        distanceChart = new Chart(distanceCanvas.getContext('2d'), {
-            type: "bar",
-            data: {
-                labels: dates,
-                datasets: [{
-                    label: label,
-                    data: yValues,
-                    borderColor: "none",
-                    backgroundColor: fillColors,
-                }],
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        // show it if it should be showed
+        if (chartType == "none") {
+            distanceCanvas.style.display = "none";
+        } else {
+            distanceCanvas.style.display = "block";
+            distanceChart = new Chart(distanceCanvas.getContext('2d'), {
+                type: "bar",
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: label,
+                        data: yValues,
+                        borderColor: "none",
+                        backgroundColor: fillColors,
+                    }],
                 },
-                scales: {
-                    y: {
-                        title: {
-                            display: true,
-                            text: label,
-                        },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
                     },
-                    x: {
-                        title: {
-                            display: false,
-                        },
-                        ticks: {
-                            callback: function(val, index) {
-                                return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: label,
                             },
+                        },
+                        x: {
+                            title: {
+                                display: false,
+                            },
+                            ticks: {
+                                callback: function(val, index) {
+                                    return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
+                                },
+                            }
                         }
                     }
                 }
-            }
-        });
-    }
+            });
+        }
+    });
 });
 
 function loadWeather(url){
@@ -300,12 +303,10 @@ function loadWeather(url){
         });
 }
 
-// Loading AQI is a bit slower (PurpleAir History API is rate-limited)
 function loadAQI(url){
     fetch(url)
         .then(response => response.json())
         .then(data => {
-            Chart.defaults.font.family = "Arial";
 
             // Populate AQI widget
             aqiPill = document.getElementById("aqi-pill")
@@ -382,10 +383,23 @@ function loadAQI(url){
                 }
                 });
             });
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+        });
+}
+
+// Loading AQI is a bit slower (PurpleAir History API is rate-limited)
+function loadPurpleair(url){
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            Chart.defaults.font.family = "Arial";
 
             // Display PurpleAir data on the AQI widget
-            const ctxAqi = document.getElementById("aqi-chart").getContext('2d');
-            const aqiChart = new Chart(ctxAqi, {
+            const ctxAqiElement = document.getElementById("aqi-chart");
+            ctxAqiElement.style.display = "block";
+            const aqiChart = new Chart(ctxAqiElement.getContext('2d'), {
                 type: 'line',
                 data: {
                     datasets: data.purpleair
@@ -405,7 +419,7 @@ function loadAQI(url){
                     scales: {
                         x: {
                             title: {
-                                display: false,
+                                display: true,
                                 text: 'PurpleAir monitors near you-- last five hours',
                             },
                             ticks: {
