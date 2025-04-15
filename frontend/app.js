@@ -303,13 +303,69 @@ function loadWeather(url){
         });
 }
 
+// Loading PurpleAir is a bit slower (PurpleAir History API is rate-limited)
+async function loadPurpleair(url){
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            Chart.defaults.font.family = "Arial";
+
+            // Display PurpleAir data on the AQI widget
+            const ctxAqiElement = document.getElementById("aqi-chart");
+            ctxAqiElement.style.display = "block";
+            const aqiChart = new Chart(ctxAqiElement.getContext('2d'), {
+                type: 'line',
+                data: {
+                    datasets: data.purpleair
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    elements: {
+                        point:{
+                            radius: 0
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'PurpleAir monitors near you-- last five hours',
+                            },
+                            ticks: {
+                                callback: function(val, index) {
+                                    return ;
+                                    // return new Date(val);
+                                },
+                            }
+                        },
+                        y: {
+                            min: 0,
+                        }
+                    }
+                }
+            });
+            purpleairPill = document.getElementById("purpleair-pill");
+            purpleairPill.style.display = "none";
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+        });
+}
+
 function loadAQI(url){
     fetch(url)
         .then(response => response.json())
         .then(data => {
 
+            purpleairPill = document.getElementById("purpleair-pill");
+
             // Populate AQI widget
-            aqiPill = document.getElementById("aqi-pill")
+            aqiPill = document.getElementById("aqi-pill");
             aqiPill.style.background=data.aqi.pill_color_hex;
             aqiPill.style.color=data.aqi.text_color_hex;
             aqiPill.textContent = `${data.aqi.AQI} - ${data.aqi.Category.Name}`;
@@ -326,11 +382,23 @@ function loadAQI(url){
                     aqiDiscussion.style.color = "rgb(0, 0, 0)";
                     aqiDiscussion.style.whiteSpace = "pre-wrap";
                     aqiDiscussion.textContent = data.aqi.Discussion;
+
+                    purpleairPill.style.display = "inline-block";
                 } else {
                     aqiText.style.display = "none";
                     aqiDiscussion.style.display = "none";
+                    purpleairPill.style.display = "none";
                 }
                 });
+
+            purpleairPill.addEventListener('click', function() {
+                const urlElements = url.split("&");
+                const urlSubset = urlElements.pop();
+                const urlNoSubset = urlElements.join("&");
+                const urlPurpleair = `${urlNoSubset}&subset=purpleair`;
+                purpleairPill.textContent = "Loading PurpleAir data...";
+                loadPurpleair(urlPurpleair);
+            });
 
             tippingPointRun = document.getElementById("tipping-point-pill-run");
             tippingPointBike = document.getElementById("tipping-point-pill-bike");
@@ -382,58 +450,6 @@ function loadAQI(url){
                     text.style.display = "none";
                 }
                 });
-            });
-        })
-        .catch(error => {
-            console.error("Error fetching data:", error);
-        });
-}
-
-// Loading AQI is a bit slower (PurpleAir History API is rate-limited)
-function loadPurpleair(url){
-    fetch(url)
-        .then(response => response.json())
-        .then(data => {
-            Chart.defaults.font.family = "Arial";
-
-            // Display PurpleAir data on the AQI widget
-            const ctxAqiElement = document.getElementById("aqi-chart");
-            ctxAqiElement.style.display = "block";
-            const aqiChart = new Chart(ctxAqiElement.getContext('2d'), {
-                type: 'line',
-                data: {
-                    datasets: data.purpleair
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    elements: {
-                        point:{
-                            radius: 0
-                        }
-                    },
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'PurpleAir monitors near you-- last five hours',
-                            },
-                            ticks: {
-                                callback: function(val, index) {
-                                    return ;
-                                    // return new Date(val);
-                                },
-                            }
-                        },
-                        y: {
-                            min: 0,
-                        }
-                    }
-                }
             });
         })
         .catch(error => {
