@@ -18,7 +18,7 @@ const weeklyDistanceKm = {
 const dailyPercentages = {
     "Monday": 0.0,
     "Tuesday": 0.1,
-    "Wednesday": 0.25, 
+    "Wednesday": 0.25,
     "Thursday": 0.1,
     "Friday": 0.1,
     "Saturday": 0.15,
@@ -27,7 +27,7 @@ const dailyPercentages = {
 const dailyZone = {
     "Monday": "Rest",
     "Tuesday": "Z2",
-    "Wednesday": "Z1", 
+    "Wednesday": "Z1",
     "Thursday": "Recovery",
     "Friday": "Z2",
     "Saturday": "Z1",
@@ -52,26 +52,26 @@ distancePill.innerText = `${distance} miles`;
 
 zone = document.getElementById("workout-zone");
 zone.innerText = dailyZone[dayName];
-if (dailyZone[dayName] == "Rest"){
-    zone.style.background="rgb(255, 255, 255)";
-    zone.style.border="1px solid black";
+if (dailyZone[dayName] == "Rest") {
+    zone.style.background = "rgb(255, 255, 255)";
+    zone.style.border = "1px solid black";
 }
-if (dailyZone[dayName] == "Z2"){
-    zone.style.background="rgb(0, 128, 255)";
-    zone.style.color="rgb(255, 255, 255)"
+if (dailyZone[dayName] == "Z2") {
+    zone.style.background = "rgb(0, 128, 255)";
+    zone.style.color = "rgb(255, 255, 255)"
 }
 
 // Show the PM strength widget on Tuesdays and Fridays
-if ((dayName == "Tuesday") || (dayName == "Friday")){
+if ((dayName == "Tuesday") || (dayName == "Friday")) {
     strengthPill = document.getElementById("strength");
-    strengthPill.style.display="inline-block";
-    strengthPill.style.background="rgb(0, 0, 0)";
-    strengthPill.style.color="rgb(255, 255, 255)";
+    strengthPill.style.display = "inline-block";
+    strengthPill.style.background = "rgb(0, 0, 0)";
+    strengthPill.style.color = "rgb(255, 255, 255)";
 }
 
 // If rest day, don't show distance
-if (dayName == "Monday"){
-    document.getElementById("workout-distance").style.display="none";
+if (dayName == "Monday") {
+    document.getElementById("workout-distance").style.display = "none";
 }
 
 // create a helper function to get the dates and distances for the program
@@ -82,29 +82,29 @@ function getDistanceData(startDate) {
     const dates = [];
     const distances = [];
     const fillColors = [];
-    
+
     while (currentDate <= endDate) {
-      // Find out what week it is
-      let currentDelta = currentDate.getTime() - startDate.getTime();
-      let currentWeek = Math.ceil(currentDelta / 1000 / 60 / 60 / 24 / 7);
-      let currentDayName = currentDate.toLocaleDateString("en-US", { weekday: 'long' });
-      let distance = weeklyDistanceKm[currentWeek] * dailyPercentages[currentDayName] / 1.609;
-      distances.push(distance);
+        // Find out what week it is
+        let currentDelta = currentDate.getTime() - startDate.getTime();
+        let currentWeek = Math.ceil(currentDelta / 1000 / 60 / 60 / 24 / 7);
+        let currentDayName = currentDate.toLocaleDateString("en-US", { weekday: 'long' });
+        let distance = weeklyDistanceKm[currentWeek] * dailyPercentages[currentDayName] / 1.609;
+        distances.push(distance);
 
-      let color;
-      if (currentDate >= today) {
-        color = "rgb(0, 128, 255)";
-      } else {
-        color = "rgb(200, 200, 200)";
-      }
-      
-      fillColors.push(color);
+        let color;
+        if (currentDate >= today) {
+            color = "rgb(0, 128, 255)";
+        } else {
+            color = "rgb(200, 200, 200)";
+        }
 
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
+        fillColors.push(color);
+
+        dates.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
     }
     return [dates, distances, fillColors];
-  }
+}
 
 // now create a chart that shows the daily distance for the duration of the program
 const distanceCanvas = document.getElementById("distance-chart");
@@ -118,7 +118,7 @@ const [dates, distances, fillColors] = getDistanceData(startDate);
 // display the chart if clicked
 const distancePills = document.querySelectorAll("#workout-distance, #workout-zone");
 distancePills.forEach(distancePill => {
-    distancePill.addEventListener('click', function() {
+    distancePill.addEventListener('click', function () {
         // destroy chart if it currently exists
         if (distanceChart) {
             distanceChart.destroy();
@@ -177,7 +177,7 @@ distancePills.forEach(distancePill => {
                                 display: false,
                             },
                             ticks: {
-                                callback: function(val, index) {
+                                callback: function (val, index) {
                                     return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
                                 },
                             }
@@ -189,7 +189,7 @@ distancePills.forEach(distancePill => {
     });
 });
 
-function loadWeather(latitude, longitude){
+function loadWeather(latitude, longitude) {
     fetch(`https://api.weather.gov/points/${latitude},${longitude}`)
         .then(response => response.json())
         .then(enpoint_data => {
@@ -206,13 +206,13 @@ function loadWeather(latitude, longitude){
             let maxChanceRain3Hours = forecastData.properties.periods.slice(0, 3).map(period => period.probabilityOfPrecipitation.value).reduce((a, b) => Math.max(a, b));
 
             // Creating space for visualization
-            if (minTemp3Hours == maxTemp3Hours){
+            if (minTemp3Hours == maxTemp3Hours) {
                 maxTemp3Hours = minTemp3Hours + 0.1 * (maxTemp24Hours - minTemp24Hours);
             }
-            if (maxChanceRain3Hours == 0){
+            if (maxChanceRain3Hours == 0) {
                 maxChanceRain3Hours = 1.0;
             }
-            if (maxChanceRain24Hours == maxChanceRain3Hours){
+            if (maxChanceRain24Hours == maxChanceRain3Hours) {
                 maxChanceRain24Hours = Math.min(maxChanceRain3Hours + 1.0, 100);
             }
 
@@ -244,15 +244,15 @@ function loadWeather(latitude, longitude){
                         label: "next 24 hours",
                         data: [[data.weather.min_temp_24_hrs, data.weather.min_temp_3_hrs]],
                         backgroundColor: "rgb(200, 200, 200)",
-                      }, 
-                      {
+                    },
+                    {
                         data: [[data.weather.min_temp_3_hrs, data.weather.max_temp_3_hrs]],
                         backgroundColor: "rgb(47, 0, 255)",
-                      }, 
-                      {
+                    },
+                    {
                         data: [[data.weather.max_temp_3_hrs, data.weather.max_temp_24_hrs]],
                         backgroundColor: "rgb(200, 200, 200)",
-                      }]
+                    }]
                 },
                 options: {
                     aspectRatio: 8,
@@ -290,7 +290,7 @@ function loadWeather(latitude, longitude){
                 type: "bar",
                 data: {
                     labels: ["rain"],
-                    datasets: [ 
+                    datasets: [
                         {
                             label: "next 3 hours",
                             data: [[0, data.weather.max_chance_rain_3_hrs]],
@@ -300,7 +300,7 @@ function loadWeather(latitude, longitude){
                             label: "next 24 hours",
                             data: [[data.weather.max_chance_rain_3_hrs, data.weather.max_chance_rain_24_hrs]],
                             backgroundColor: "rgb(200, 200, 200)",
-                      }]
+                        }]
                 },
                 options: {
                     aspectRatio: 8,
@@ -340,7 +340,7 @@ function loadWeather(latitude, longitude){
 }
 
 // Loading PurpleAir is a bit slower (PurpleAir History API is rate-limited)
-async function loadPurpleair(url){
+async function loadPurpleair(url) {
     fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -362,7 +362,7 @@ async function loadPurpleair(url){
                         }
                     },
                     elements: {
-                        point:{
+                        point: {
                             radius: 0
                         }
                     },
@@ -373,8 +373,8 @@ async function loadPurpleair(url){
                                 text: 'PurpleAir monitors near you-- last five hours',
                             },
                             ticks: {
-                                callback: function(val, index) {
-                                    return ;
+                                callback: function (val, index) {
+                                    return;
                                     // return new Date(val);
                                 },
                             }
@@ -393,7 +393,7 @@ async function loadPurpleair(url){
         });
 }
 
-function loadAQI(url){
+function loadAQI(url) {
     fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -402,10 +402,10 @@ function loadAQI(url){
 
             // Populate AQI widget
             aqiPill = document.getElementById("aqi-pill");
-            aqiPill.style.background=data.aqi.pill_color_hex;
-            aqiPill.style.color=data.aqi.text_color_hex;
+            aqiPill.style.background = data.aqi.pill_color_hex;
+            aqiPill.style.color = data.aqi.text_color_hex;
             aqiPill.textContent = `${data.aqi.AQI} - ${data.aqi.Category.Name}`;
-            aqiPill.addEventListener('click', function() {
+            aqiPill.addEventListener('click', function () {
                 const aqiText = document.getElementById("aqi-description");
                 const aqiDiscussion = document.getElementById("aqi-discussion");
                 if (aqiText.style.display === "none") {
@@ -425,9 +425,9 @@ function loadAQI(url){
                     aqiDiscussion.style.display = "none";
                     purpleairPill.style.display = "none";
                 }
-                });
+            });
 
-            purpleairPill.addEventListener('click', function() {
+            purpleairPill.addEventListener('click', function () {
                 const urlElements = url.split("&");
                 const urlSubset = urlElements.pop();
                 const urlNoSubset = urlElements.join("&");
@@ -454,37 +454,37 @@ function loadAQI(url){
             const pills = document.querySelectorAll('.pill-tab');
 
             pills.forEach(pill => {
-                pill.addEventListener('click', function() {
-                // Remove 'top' class from all pills
-                pills.forEach(p => p.classList.remove('top'));
+                pill.addEventListener('click', function () {
+                    // Remove 'top' class from all pills
+                    pills.forEach(p => p.classList.remove('top'));
 
-                // Add 'top' class to the clicked pill
-                this.classList.add('top');
+                    // Add 'top' class to the clicked pill
+                    this.classList.add('top');
 
-                // Adjust the z-index of the clicked item.
-                const pillRow = document.querySelector(".pill-tab-row")
-                const children = Array.from(pillRow.children);
-                const clickedIndex = children.indexOf(this);
+                    // Adjust the z-index of the clicked item.
+                    const pillRow = document.querySelector(".pill-tab-row")
+                    const children = Array.from(pillRow.children);
+                    const clickedIndex = children.indexOf(this);
 
-                children.forEach((child, index) => {
-                    if(index < clickedIndex){
-                    child.style.zIndex = 1;
-                    }else if(index === clickedIndex){
-                    child.style.zIndex = 2;
-                    }else{
-                    child.style.zIndex = 0;
+                    children.forEach((child, index) => {
+                        if (index < clickedIndex) {
+                            child.style.zIndex = 1;
+                        } else if (index === clickedIndex) {
+                            child.style.zIndex = 2;
+                        } else {
+                            child.style.zIndex = 0;
+                        }
+                    })
+
+                    // display the description if clicked
+                    const text = document.getElementById("tipping-point-description");
+                    if (text.style.display === "none") {
+                        text.style.display = "block";
+                        text.style.fontSize = "12px";
+                        text.style.color = "rgb(100, 100, 100)";
+                    } else {
+                        text.style.display = "none";
                     }
-                })
-
-                // display the description if clicked
-                const text = document.getElementById("tipping-point-description");
-                if (text.style.display === "none") {
-                    text.style.display = "block";
-                    text.style.fontSize = "12px";
-                    text.style.color = "rgb(100, 100, 100)";
-                } else {
-                    text.style.display = "none";
-                }
                 });
             });
         })
@@ -501,13 +501,13 @@ const hostname = window.location.hostname;
 console.log(`running on ${hostname}`);
 
 // if it's running on my raspberry pi, url is the hostname
-if (hostname === "raspberrypi.local"){
+if (hostname === "raspberrypi.local") {
     url = hostname;
     port = ":8081";
-// if it's running on my website
+    // if it's running on my website
 } else if (hostname.includes(".com")) {
     url = `api.${hostname}`;
-// otherwise, attempt to use localhost
+    // otherwise, attempt to use localhost
 } else {
     url = "localhost";
     transferProtocol = "http:";
@@ -524,16 +524,16 @@ async function locSuccessCallback(position) {
 
 function locErrorCallback(position) {
     fetch(`https://ipinfo.io/json`)
-    .then(response => response.json())
-    .then(data => {
-        const lat = data.loc.split(",")[0];
-        const lon = data.loc.split(",")[1];
-        loadWeather(lat, lon);
-        loadAQI(`${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`);
-    })
-    .catch(error => {
-        console.error("Error fetching data:", error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            const lat = data.loc.split(",")[0];
+            const lon = data.loc.split(",")[1];
+            loadWeather(lat, lon);
+            loadAQI(`${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`);
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+        });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -541,15 +541,15 @@ document.addEventListener("DOMContentLoaded", () => {
         navigator.geolocation.getCurrentPosition(locSuccessCallback, locErrorCallback);
     } else {
         fetch(`https://ipinfo.io/json`)
-        .then(response => response.json())
-        .then(data => {
-            const lat = data.loc.split(",")[0];
-            const lon = data.loc.split(",")[1];
-            loadWeather(lat, lon);
-        })
-        .catch(error => {
-            console.error("Error fetching data:", error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                const lat = data.loc.split(",")[0];
+                const lon = data.loc.split(",")[1];
+                loadWeather(lat, lon);
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+            });
         loadAQI(`${transferProtocol}//${url}${port}?subset=aqi`);
     }
 });
