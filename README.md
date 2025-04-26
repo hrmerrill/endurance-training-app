@@ -17,7 +17,7 @@ The home page displays three widgets:
 
 On the homepage, the widgets display a short summary of information, and clicking buttons within each widget will show the user information about the data displayed in the widget. Code for the frontend is in the `frontend` subdirectory.
 
-The backend Python server retrieves weather forecasts from the weather.gov API, AQI information from the PurpleAir API and AirNow API, and recommended workout information is retrieved from from a local file. Code for the backend is in the `backend` subdirectory.
+The backend Python server retrieves AQI information from the PurpleAir API and AirNow API, and recommended workout information is retrieved from from a local file. Code for the backend is in the `backend` subdirectory.
 
 ## For developers
 
