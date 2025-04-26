@@ -189,10 +189,46 @@ distancePills.forEach(distancePill => {
     });
 });
 
-function loadWeather(url){
-    fetch(url)
+function loadWeather(latitude, longitude){
+    fetch(`https://api.weather.gov/points/${latitude},${longitude}`)
         .then(response => response.json())
-        .then(data => {
+        .then(enpoint_data => {
+            return fetch(enpoint_data.properties.forecastHourly);
+        })
+        .then(response => response.json())
+        .then(forecastData => {
+
+            let minTemp24Hours = forecastData.properties.periods.slice(0, 24).map(period => period.temperature).reduce((a, b) => Math.min(a, b));
+            let maxTemp24Hours = forecastData.properties.periods.slice(0, 24).map(period => period.temperature).reduce((a, b) => Math.max(a, b));
+            let minTemp3Hours = forecastData.properties.periods.slice(0, 3).map(period => period.temperature).reduce((a, b) => Math.min(a, b));
+            let maxTemp3Hours = forecastData.properties.periods.slice(0, 3).map(period => period.temperature).reduce((a, b) => Math.max(a, b));
+            let maxChanceRain24Hours = forecastData.properties.periods.slice(0, 24).map(period => period.probabilityOfPrecipitation.value).reduce((a, b) => Math.max(a, b));
+            let maxChanceRain3Hours = forecastData.properties.periods.slice(0, 3).map(period => period.probabilityOfPrecipitation.value).reduce((a, b) => Math.max(a, b));
+
+            // Creating space for visualization
+            if (minTemp3Hours == maxTemp3Hours){
+                maxTemp3Hours = minTemp3Hours + 0.1 * (maxTemp24Hours - minTemp24Hours);
+            }
+            if (maxChanceRain3Hours == 0){
+                maxChanceRain3Hours = 1.0;
+            }
+            if (maxChanceRain24Hours == maxChanceRain3Hours){
+                maxChanceRain24Hours = Math.min(maxChanceRain3Hours + 1.0, 100);
+            }
+
+            const data = {
+                weather: {
+                    min_temp_24_hrs: minTemp24Hours,
+                    max_temp_24_hrs: maxTemp24Hours,
+                    min_temp_3_hrs: minTemp3Hours,
+                    max_temp_3_hrs: maxTemp3Hours,
+                    max_chance_rain_24_hrs: maxChanceRain24Hours,
+                    max_chance_rain_3_hrs: maxChanceRain3Hours,
+                    current_temperature: forecastData.properties.periods[0].temperature,
+                    description: forecastData.properties.periods[0].shortForecast
+                }
+            };
+
             Chart.defaults.font.family = "Arial";
 
             // Populate weather widget
@@ -482,20 +518,38 @@ if (hostname === "raspberrypi.local"){
 async function locSuccessCallback(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
-    loadWeather(`${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=weather`);
+    loadWeather(lat, lon);
     loadAQI(`${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`);
 }
 
 function locErrorCallback(position) {
-    loadWeather(`${transferProtocol}//${url}${port}/?subset=weather`);
-    loadAQI(`${transferProtocol}//${url}${port}/?subset=aqi`);
+    fetch(`https://ipinfo.io/json`)
+    .then(response => response.json())
+    .then(data => {
+        const lat = data.loc.split(",")[0];
+        const lon = data.loc.split(",")[1];
+        loadWeather(lat, lon);
+        loadAQI(`${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`);
+    })
+    .catch(error => {
+        console.error("Error fetching data:", error);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(locSuccessCallback, locErrorCallback);
     } else {
-        loadWeather(`${transferProtocol}//${url}${port}/?subset=weather`);
+        fetch(`https://ipinfo.io/json`)
+        .then(response => response.json())
+        .then(data => {
+            const lat = data.loc.split(",")[0];
+            const lon = data.loc.split(",")[1];
+            loadWeather(lat, lon);
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+        });
         loadAQI(`${transferProtocol}//${url}${port}?subset=aqi`);
     }
 });
