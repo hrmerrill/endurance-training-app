@@ -225,7 +225,7 @@ function loadWeather(latitude, longitude){
                     max_chance_rain_24_hrs: maxChanceRain24Hours,
                     max_chance_rain_3_hrs: maxChanceRain3Hours,
                     current_temperature: forecastData.properties.periods[0].temperature,
-                    description: forecastData.properties.periods[0].shortForecast
+                    description: forecastData.properties.periods[0].shortForecast.toLowerCase()
                 }
             };
 

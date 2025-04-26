@@ -5,12 +5,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any, Dict, Optional
 
 import numpy as np
-from endurance_training_app import (
-    calculate_tipping_point,
-    get_aqi_data,
-    get_purpleair_data,
-    get_weather_data,
-)
+from endurance_training_app import calculate_tipping_point, get_aqi_data, get_purpleair_data
 
 
 def get_all_data(
@@ -31,7 +26,7 @@ def get_all_data(
     Returns
     -------
     Dict[str, Any]
-        The AirNow, PurpleAir, and weather forecast data for the current location.
+        The AirNow and/or PurpleAir data for the current location.
     """
     data = {}
     if subset == "aqi":
@@ -40,13 +35,9 @@ def get_all_data(
     elif subset == "purpleair":
         data["purpleair"] = get_purpleair_data(lon=lon, lat=lat)
         aqi = np.mean([np.mean([x["y"] for x in d["data"]]) for d in data["purpleair"]])
-    elif subset == "weather":
-        data["weather"] = get_weather_data(lon=lon, lat=lat)
-        aqi = None
     else:
         data["aqi"] = get_aqi_data(lon=lon, lat=lat)
         data["purpleair"] = get_purpleair_data(lon=lon, lat=lat)
-        data["weather"] = get_weather_data(lon=lon, lat=lat)
 
         # use the maximum of the AirNow forecast and the average purpleair data to find tipping points
         purpleair_avg_aqi = np.mean(
