@@ -64,9 +64,11 @@ clicked button is placed on top. */
     text-align: center;
     text-decoration: none;
     border-radius: 16px;
-    margin: 0 5px; /* Adjust overlap */
+    margin: 0 5px;
+    /* Adjust overlap */
     cursor: pointer;
-    transition: transform 0.3s ease, z-index 0s; /* Add z-index transition */
+    transition: transform 0.3s ease, z-index 0s;
+    /* Add z-index transition */
     border: none;
 }
 
