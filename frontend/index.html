@@ -18,7 +18,7 @@
             <canvas id="distance-chart" style="display:none;"></canvas>
             <br>
             <textarea id="prompt"
-                style="height: 50px; width: 250px; margin-top: 25px;">Help me plan today's workout.</textarea>
+                style="height: 50px; width: 250px; margin-top: 25px; display: none;">Help me plan today's workout.</textarea>
             <br>
             <svg class="absolute size-0" aria-hidden="true" focusable="false" style="width:0px;height:0px">
                 <linearGradient id="svg-ai-icon-gradient" x1="12.5" x2="12.5" y1="2.5" y2="21.5"
@@ -27,12 +27,18 @@
                     <stop offset="1" stop-color="#D136E0"></stop>
                 </linearGradient>
             </svg>
-            <button class="ai-pill" id="ai-pill-loading">
+            <button class="ai-pill" id="get-ai-pill">
                 <svg viewBox="0 0 24 24" class="icon" fill="url(#svg-ai-icon-gradient)" height="14" width="14">
                     <path fill-rule="evenodd"
                         d="M21.5 6.5a6.77 6.77 0 0 1-4-4 6.77 6.77 0 0 1-4 4 6.77 6.77 0 0 1 4 4 6.77 6.77 0 0 1 4-4M3.5 14A12.69 12.69 0 0 0 11 6.5a12.69 12.69 0 0 0 7.5 7.5 12.69 12.69 0 0 0-7.5 7.5A12.7 12.7 0 0 0 3.5 14m7.5 3.638A14.5 14.5 0 0 0 7.362 14 14.5 14.5 0 0 0 11 10.362 14.5 14.5 0 0 0 14.638 14 14.5 14.5 0 0 0 11 17.638"
                         clip-rule="evenodd"></path>
-                </svg>Loading...</button>
+                </svg>Get AI Coach</button>
+            <button class="ai-pill" id="ai-pill-loading" style="display:none;">
+                <svg viewBox="0 0 24 24" class="icon" fill="url(#svg-ai-icon-gradient)" height="14" width="14">
+                    <path fill-rule="evenodd"
+                        d="M21.5 6.5a6.77 6.77 0 0 1-4-4 6.77 6.77 0 0 1-4 4 6.77 6.77 0 0 1 4 4 6.77 6.77 0 0 1 4-4M3.5 14A12.69 12.69 0 0 0 11 6.5a12.69 12.69 0 0 0 7.5 7.5 12.69 12.69 0 0 0-7.5 7.5A12.7 12.7 0 0 0 3.5 14m7.5 3.638A14.5 14.5 0 0 0 7.362 14 14.5 14.5 0 0 0 11 10.362 14.5 14.5 0 0 0 14.638 14 14.5 14.5 0 0 0 11 17.638"
+                        clip-rule="evenodd"></path>
+                </svg>Loading (can take up to a minute)...</button>
             <button class="ai-pill" id="ai-pill" style="display:none;">
                 <svg viewBox="0 0 24 24" class="icon" fill="url(#svg-ai-icon-gradient)" height="14" width="14">
                     <path fill-rule="evenodd"

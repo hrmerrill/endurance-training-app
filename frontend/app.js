@@ -200,8 +200,44 @@ function loadWorkout() {
 async function loadAI(weatherData, aqiData) {
     const modelFileName = 'gemma3-1b-it-int4.task';
     const output = document.getElementById('ai-coach-output');
+    const getAiButton = document.getElementById("get-ai-pill");
     const aiButton = document.getElementById("ai-pill");
     const aiButtonLoading = document.getElementById("ai-pill-loading");
+    const prompt = document.getElementById("prompt");
+
+    let llmInference;
+    getAiButton.addEventListener('click', async function () {
+        getAiButton.style.display = "none";
+        aiButtonLoading.style.display = "inline-block";
+        prompt.style.display = "inline-block";
+
+        const genaiFileset = await FilesetResolver.forGenAiTasks(
+            'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai/wasm');
+
+        LlmInference
+            .createFromOptions(genaiFileset, {
+                baseOptions: { modelAssetPath: modelFileName },
+                maxTokens: 2048,  // The maximum number of tokens (input + output) the model handles.
+                randomSeed: 1,   // The random seed used during text generation.
+                topK: 1,  // The number of tokens the model considers at each step of
+                // generation. Limits predictions to the top k most-probable
+                // tokens. Setting randomSeed is required for this to make
+                // effects.
+                temperature:
+                    0.1,  // The amount of randomness introduced during generation.
+                // Setting randomSeed is required for this to make effects.
+            })
+            .then(llm => {
+                llmInference = llm;
+                aiButtonLoading.style.display = "none";
+                aiButton.style.display = "inline-block";
+                aiButton.style.borderColor = "#C938E3";
+                aiButton.disabled = false;
+            })
+            .catch(() => {
+                alert('Failed to initialize the task.');
+            });
+    });
 
     function displayPartialResults(partialResults, complete) {
         if (partialResults == "<end_of_turn>") {
@@ -211,18 +247,13 @@ async function loadAI(weatherData, aqiData) {
         }
         if (complete) {
             aiButton.disabled = false;
-            if (!output.textContent) {
-                output.textContent = '';
+            if (!output.mdContent) {
+                output.mdContent = '';
             }
         }
     }
 
-    const genaiFileset = await FilesetResolver.forGenAiTasks(
-        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai/wasm');
-    let llmInference;
-
     aiButton.addEventListener('click', function () {
-        const prompt = document.getElementById("prompt");
         const aqi = document.getElementById("aqi-pill").textContent;
         const weather = document.getElementById("weather-summary").textContent;
         const distance = document.getElementById("workout-distance").textContent;
@@ -234,59 +265,35 @@ async function loadAI(weatherData, aqiData) {
         // remove the SVG from the tipping point text
         tipping = tipping.split("</svg>")[1];
 
-        let inputText = "<bos><start_of_turn>user\nYou are a professional endurance training " +
+        let inputText = "<bos><start_of_turn>user\nYou are an assistant and endurance training " +
             "coach. You give clear, simple guidance based on today's planned workout, air quality, " +
             `and weather conditions. Give guidance based only on your knowledge, listed below:\n\n` +
-            `Weather: if it is stormy or extremely cold or hot, you should recommend an indoor workout.\n` +
-            `Air quality: if the air quality is not "Good", you should recommend an indoor workout.\n` +
+            `Weather: Today's weather is ${weather} with ${precip}. if it is stormy or extremely cold ` +
+            `or hot, you should recommend an indoor workout.\n` +
+            `Air quality: The air quality index today is ${aqi}. If the air quality is not "Good", you ` +
+            `should recommend an indoor workout.\n` +
             `Tipping point: the "tipping point" is the time it takes for the health benefits of exercising ` +
-            `outdoors to be outweighed by the detrimental effects of air pollution.\n` +
-            `Heart rate zone: Z1 is very easy, Z2 is easy enough to maintain a conversation or ` +
-            `breathing through your nose, Z3 is difficult but maintainable for 30 minutes, Z4 is ` +
-            `very difficult, and Z5 is maximum effort, maintainable for only seconds at a time.\n\n` +
-            `Today's workout is a ${distance} run in heart rate zone ${zone}. `
+            `outdoors to be outweighed by the detrimental effects of air pollution. Today's running tipping ` +
+            `point is ${tipping}; running for longer than this time may negate the health benefits of ` +
+            `exercising outdoors.\n` +
+            `Heart rate zone: Today's target heart rate zone is ${zone}. Z1 is very easy, Z2 is ` +
+            `easy enough to maintain a conversation or breathing through your nose, Z3 is difficult ` +
+            `but maintainable for 30 minutes, Z4 is very difficult, and Z5 is maximum effort, maintainable ` +
+            `for only seconds at a time.\n` +
+            `Distance: Today's target workout is a ${distance} run in heart rate zone ${zone}.\n`;
 
         if (strength != "none") {
-            inputText += "It will also include a strength workout. ";
+            inputText += "Strength: Strength training is also planned for today.\n";
         }
 
-        inputText += `Today's weather is ${weather} with ${precip}. ` +
-            `The air quality is ${aqi}, so the running tipping point is ${tipping}; running ` +
-            `for longer than this time may negate the health benefits of exercising outdoors. ` +
-            `If the weather is bad or if the air quality is poor or the tipping point is under ` +
-            `an hour, you should recommend an indoor workout.\n\n` +
-            `${prompt.value}\n\nRespond with Markdown.` +
-            "<end_of_turn>\n<start_of_turn>model\n";
+        inputText += `\nNow respond to the following prompt with Markdown:\n\n${prompt.value}` +
+            `<end_of_turn>\n<start_of_turn>model\n`;
         console.log("inputText: ", inputText);
 
-        output.textContent = '';
+        output.mdContent = '';
         aiButton.disabled = true;
         llmInference.generateResponse(inputText, displayPartialResults);
     });
-
-    LlmInference
-        .createFromOptions(genaiFileset, {
-            baseOptions: { modelAssetPath: modelFileName },
-            maxTokens: 2048,  // The maximum number of tokens (input + output) the model handles.
-            randomSeed: 1,   // The random seed used during text generation.
-            topK: 1,  // The number of tokens the model considers at each step of
-            // generation. Limits predictions to the top k most-probable
-            // tokens. Setting randomSeed is required for this to make
-            // effects.
-            temperature:
-                0.1,  // The amount of randomness introduced during generation.
-            // Setting randomSeed is required for this to make effects.
-        })
-        .then(llm => {
-            llmInference = llm;
-            aiButtonLoading.style.display = "none";
-            aiButton.style.display = "inline-block";
-            aiButton.style.borderColor = "#C938E3";
-            aiButton.disabled = false;
-        })
-        .catch(() => {
-            alert('Failed to initialize the task.');
-        });
 }
 
 async function loadWeather(latitude, longitude) {
