@@ -16,6 +16,32 @@
             <button class="pill" id="workout-zone">Loading...</button>
             <button class="pill" id="strength" style="display:none;">PM strength</button>
             <canvas id="distance-chart" style="display:none;"></canvas>
+            <br>
+            <textarea id="prompt"
+                style="height: 50px; width: 250px; margin-top: 25px;">Help me plan today's workout.</textarea>
+            <br>
+            <svg class="absolute size-0" aria-hidden="true" focusable="false" style="width:0px;height:0px">
+                <linearGradient id="svg-ai-icon-gradient" x1="12.5" x2="12.5" y1="2.5" y2="21.5"
+                    gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#3941FD"></stop>
+                    <stop offset="1" stop-color="#D136E0"></stop>
+                </linearGradient>
+            </svg>
+            <button class="ai-pill" id="ai-pill-loading">
+                <svg viewBox="0 0 24 24" class="icon" fill="url(#svg-ai-icon-gradient)" height="14" width="14">
+                    <path fill-rule="evenodd"
+                        d="M21.5 6.5a6.77 6.77 0 0 1-4-4 6.77 6.77 0 0 1-4 4 6.77 6.77 0 0 1 4 4 6.77 6.77 0 0 1 4-4M3.5 14A12.69 12.69 0 0 0 11 6.5a12.69 12.69 0 0 0 7.5 7.5 12.69 12.69 0 0 0-7.5 7.5A12.7 12.7 0 0 0 3.5 14m7.5 3.638A14.5 14.5 0 0 0 7.362 14 14.5 14.5 0 0 0 11 10.362 14.5 14.5 0 0 0 14.638 14 14.5 14.5 0 0 0 11 17.638"
+                        clip-rule="evenodd"></path>
+                </svg>Loading...</button>
+            <button class="ai-pill" id="ai-pill" style="display:none;">
+                <svg viewBox="0 0 24 24" class="icon" fill="url(#svg-ai-icon-gradient)" height="14" width="14">
+                    <path fill-rule="evenodd"
+                        d="M21.5 6.5a6.77 6.77 0 0 1-4-4 6.77 6.77 0 0 1-4 4 6.77 6.77 0 0 1 4 4 6.77 6.77 0 0 1 4-4M3.5 14A12.69 12.69 0 0 0 11 6.5a12.69 12.69 0 0 0 7.5 7.5 12.69 12.69 0 0 0-7.5 7.5A12.7 12.7 0 0 0 3.5 14m7.5 3.638A14.5 14.5 0 0 0 7.362 14 14.5 14.5 0 0 0 11 10.362 14.5 14.5 0 0 0 14.638 14 14.5 14.5 0 0 0 11 17.638"
+                        clip-rule="evenodd"></path>
+                </svg>AI Coach</button>
+            <p align="left">
+                <md-block id="ai-coach-output"></md-block>
+            </p>
         </div>
         <div class="widget" id="aqi-widget">
             <h2>Air Quality</h2>
@@ -58,12 +84,13 @@
         <div class="widget" id="weather-widget">
             <h2>Weather</h2>
             <button class="pill" id="weather-summary">Loading...</button>
+            <button class="pill" id="weather-precip" style="display: none;"></button>
             <p></p>
             <canvas id="temperature-chart" height="90" width="300"></canvas>
             <canvas id="rain-chart" height="128" width="300"></canvas>
         </div>
     </div>
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 
