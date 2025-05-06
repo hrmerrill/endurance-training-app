@@ -69,8 +69,8 @@ function loadWorkout() {
     }
 
     // Show the PM strength widget on Tuesdays and Fridays
+    const strengthPill = document.getElementById("strength");
     if ((dayName == "Tuesday") || (dayName == "Friday")) {
-        strengthPill = document.getElementById("strength");
         strengthPill.style.display = "inline-block";
         strengthPill.style.background = "rgb(0, 0, 0)";
         strengthPill.style.color = "rgb(255, 255, 255)";
