@@ -1,195 +1,302 @@
-// Three increasing weeks and one decreasing week, increasing overall for 12 weeks
-const weeklyDistanceKm = {
-    1: 28,
-    2: 32,
-    3: 36,
-    4: 20,
-    5: 40,
-    6: 43,
-    7: 48,
-    8: 29,
-    9: 51,
-    10: 55,
-    11: 60,
-    12: 32,
-}
+import { FilesetResolver, LlmInference } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai';
+import { MarkdownBlock, MarkdownSpan, MarkdownElement } from "https://md-block.verou.me/md-block.js";
 
-// Modulate intensity and percentage of weekly volume
-const dailyPercentages = {
-    "Monday": 0.0,
-    "Tuesday": 0.1,
-    "Wednesday": 0.25,
-    "Thursday": 0.1,
-    "Friday": 0.1,
-    "Saturday": 0.15,
-    "Sunday": 0.3,
-}
-const dailyZone = {
-    "Monday": "Rest",
-    "Tuesday": "Z2",
-    "Wednesday": "Z1",
-    "Thursday": "Recovery",
-    "Friday": "Z2",
-    "Saturday": "Z1",
-    "Sunday": "Z2",
-}
+let weatherData;
+let aqiData;
 
-// Choose a starting date
-const startDate = new Date("2025-03-24");
-
-// Get today's date
-const today = new Date();
-dayName = today.toLocaleDateString("en-US", { weekday: 'long' });
-
-// Find out what week it is
-const timeDelta = today.getTime() - startDate.getTime();
-const week = Math.ceil(timeDelta / 1000 / 60 / 60 / 24 / 7);
-
-// Populate workout widget with today's workout
-distance = Math.round(weeklyDistanceKm[week] * dailyPercentages[dayName] / 1.609 * 10) / 10;
-distancePill = document.getElementById("workout-distance");
-distancePill.innerText = `${distance} miles`;
-
-zone = document.getElementById("workout-zone");
-zone.innerText = dailyZone[dayName];
-if (dailyZone[dayName] == "Rest") {
-    zone.style.background = "rgb(255, 255, 255)";
-    zone.style.border = "1px solid black";
-}
-if (dailyZone[dayName] == "Z2") {
-    zone.style.background = "rgb(0, 128, 255)";
-    zone.style.color = "rgb(255, 255, 255)"
-}
-
-// Show the PM strength widget on Tuesdays and Fridays
-if ((dayName == "Tuesday") || (dayName == "Friday")) {
-    strengthPill = document.getElementById("strength");
-    strengthPill.style.display = "inline-block";
-    strengthPill.style.background = "rgb(0, 0, 0)";
-    strengthPill.style.color = "rgb(255, 255, 255)";
-}
-
-// If rest day, don't show distance
-if (dayName == "Monday") {
-    document.getElementById("workout-distance").style.display = "none";
-}
-
-// create a helper function to get the dates and distances for the program
-function getDistanceData(startDate) {
-    let currentDate = new Date(startDate);
-    const twelveWeeksInMs = 12 * 7 * 24 * 60 * 60 * 1000;
-    const endDate = new Date(currentDate.getTime() + twelveWeeksInMs);
-    const dates = [];
-    const distances = [];
-    const fillColors = [];
-
-    while (currentDate <= endDate) {
-        // Find out what week it is
-        let currentDelta = currentDate.getTime() - startDate.getTime();
-        let currentWeek = Math.ceil(currentDelta / 1000 / 60 / 60 / 24 / 7);
-        let currentDayName = currentDate.toLocaleDateString("en-US", { weekday: 'long' });
-        let distance = weeklyDistanceKm[currentWeek] * dailyPercentages[currentDayName] / 1.609;
-        distances.push(distance);
-
-        let color;
-        if (currentDate >= today) {
-            color = "rgb(0, 128, 255)";
-        } else {
-            color = "rgb(200, 200, 200)";
-        }
-
-        fillColors.push(color);
-
-        dates.push(new Date(currentDate));
-        currentDate.setDate(currentDate.getDate() + 1);
+function loadWorkout() {
+    // Three increasing weeks and one decreasing week, increasing overall for 12 weeks
+    const weeklyDistanceKm = {
+        1: 28,
+        2: 32,
+        3: 36,
+        4: 20,
+        5: 40,
+        6: 43,
+        7: 48,
+        8: 29,
+        9: 51,
+        10: 55,
+        11: 60,
+        12: 32,
     }
-    return [dates, distances, fillColors];
-}
 
-// now create a chart that shows the daily distance for the duration of the program
-const distanceCanvas = document.getElementById("distance-chart");
-let distanceChart;
-let label;
-let yValues;
-var chartType = "none";
-const minutePerMile = 12.5;
-const [dates, distances, fillColors] = getDistanceData(startDate);
+    // Modulate intensity and percentage of weekly volume
+    const dailyPercentages = {
+        "Monday": 0.0,
+        "Tuesday": 0.1,
+        "Wednesday": 0.25,
+        "Thursday": 0.1,
+        "Friday": 0.1,
+        "Saturday": 0.15,
+        "Sunday": 0.3,
+    }
+    const dailyZone = {
+        "Monday": "Rest",
+        "Tuesday": "Z2",
+        "Wednesday": "Z1",
+        "Thursday": "Recovery",
+        "Friday": "Z2",
+        "Saturday": "Z1",
+        "Sunday": "Z2",
+    }
 
-// display the chart if clicked
-const distancePills = document.querySelectorAll("#workout-distance, #workout-zone");
-distancePills.forEach(distancePill => {
-    distancePill.addEventListener('click', function () {
-        // destroy chart if it currently exists
-        if (distanceChart) {
-            distanceChart.destroy();
+    // Choose a starting date
+    const startDate = new Date("2025-03-24");
+
+    // Get today's date
+    const today = new Date();
+    const dayName = today.toLocaleDateString("en-US", { weekday: 'long' });
+
+    // Find out what week it is
+    const timeDelta = today.getTime() - startDate.getTime();
+    const week = Math.ceil(timeDelta / 1000 / 60 / 60 / 24 / 7);
+
+    // Populate workout widget with today's workout
+    const distance = Math.round(weeklyDistanceKm[week] * dailyPercentages[dayName] / 1.609 * 10) / 10;
+    const distancePill = document.getElementById("workout-distance");
+    distancePill.innerText = `${distance} miles`;
+
+    const zone = document.getElementById("workout-zone");
+    zone.innerText = dailyZone[dayName];
+    if (dailyZone[dayName] == "Rest") {
+        zone.style.background = "rgb(255, 255, 255)";
+        zone.style.border = "1px solid black";
+    }
+    if (dailyZone[dayName] == "Z2") {
+        zone.style.background = "rgb(0, 128, 255)";
+        zone.style.color = "rgb(255, 255, 255)"
+    }
+
+    // Show the PM strength widget on Tuesdays and Fridays
+    const strengthPill = document.getElementById("strength");
+    if ((dayName == "Tuesday") || (dayName == "Friday")) {
+        strengthPill.style.display = "inline-block";
+        strengthPill.style.background = "rgb(0, 0, 0)";
+        strengthPill.style.color = "rgb(255, 255, 255)";
+    }
+
+    // If rest day, don't show distance
+    if (dayName == "Monday") {
+        document.getElementById("workout-distance").style.display = "none";
+    }
+
+    // create a helper function to get the dates and distances for the program
+    function getDistanceData(startDate) {
+        let currentDate = new Date(startDate);
+        const twelveWeeksInMs = 12 * 7 * 24 * 60 * 60 * 1000;
+        const endDate = new Date(currentDate.getTime() + twelveWeeksInMs);
+        const dates = [];
+        const distances = [];
+        const fillColors = [];
+
+        while (currentDate <= endDate) {
+            // Find out what week it is
+            let currentDelta = currentDate.getTime() - startDate.getTime();
+            let currentWeek = Math.ceil(currentDelta / 1000 / 60 / 60 / 24 / 7);
+            let currentDayName = currentDate.toLocaleDateString("en-US", { weekday: 'long' });
+            let distance = weeklyDistanceKm[currentWeek] * dailyPercentages[currentDayName] / 1.609;
+            distances.push(distance);
+
+            let color;
+            if (currentDate >= today) {
+                color = "rgb(0, 128, 255)";
+            } else {
+                color = "rgb(200, 200, 200)";
+            }
+
+            fillColors.push(color);
+
+            dates.push(new Date(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
         }
+        return [dates, distances, fillColors];
+    }
 
-        // cycle through distance, time, and no chart for each click
-        if (chartType == "none") {
-            chartType = "distance";
-        } else if (chartType == "distance") {
-            chartType = "time";
-        } else {
-            chartType = "none";
-        }
+    // now create a chart that shows the daily distance for the duration of the program
+    const distanceCanvas = document.getElementById("distance-chart");
+    let distanceChart;
+    let label;
+    let yValues;
+    var chartType = "none";
+    const minutePerMile = 12.5;
+    const [dates, distances, fillColors] = getDistanceData(startDate);
 
-        // depending on chart type, edit the data and labels
-        if (chartType == "distance") {
-            label = "Distance (miles)";
-            yValues = distances;
-        } else if (chartType == "time") {
-            label = "Time (minutes)";
-            yValues = distances.map(x => x * minutePerMile);
-        }
+    // display the chart if clicked
+    const distancePills = document.querySelectorAll("#workout-distance, #workout-zone");
+    distancePills.forEach(distancePill => {
+        distancePill.addEventListener('click', function () {
+            // destroy chart if it currently exists
+            if (distanceChart) {
+                distanceChart.destroy();
+            }
 
-        // show it if it should be showed
-        if (chartType == "none") {
-            distanceCanvas.style.display = "none";
-        } else {
-            distanceCanvas.style.display = "block";
-            distanceChart = new Chart(distanceCanvas.getContext('2d'), {
-                type: "bar",
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: label,
-                        data: yValues,
-                        borderColor: "none",
-                        backgroundColor: fillColors,
-                    }],
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
+            // cycle through distance, time, and no chart for each click
+            if (chartType == "none") {
+                chartType = "distance";
+            } else if (chartType == "distance") {
+                chartType = "time";
+            } else {
+                chartType = "none";
+            }
+
+            // depending on chart type, edit the data and labels
+            if (chartType == "distance") {
+                label = "Distance (miles)";
+                yValues = distances;
+            } else if (chartType == "time") {
+                label = "Time (minutes)";
+                yValues = distances.map(x => x * minutePerMile);
+            }
+
+            // show it if it should be showed
+            if (chartType == "none") {
+                distanceCanvas.style.display = "none";
+            } else {
+                distanceCanvas.style.display = "block";
+                distanceChart = new Chart(distanceCanvas.getContext('2d'), {
+                    type: "bar",
+                    data: {
+                        labels: dates,
+                        datasets: [{
+                            label: label,
+                            data: yValues,
+                            borderColor: "none",
+                            backgroundColor: fillColors,
+                        }],
                     },
-                    scales: {
-                        y: {
-                            title: {
-                                display: true,
-                                text: label,
-                            },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
                         },
-                        x: {
-                            title: {
-                                display: false,
-                            },
-                            ticks: {
-                                callback: function (val, index) {
-                                    return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
+                        scales: {
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: label,
                                 },
+                            },
+                            x: {
+                                title: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    callback: function (val, index) {
+                                        return dates[index].toLocaleDateString("en-US", { month: '2-digit', day: '2-digit' });
+                                    },
+                                }
                             }
                         }
                     }
-                }
-            });
-        }
+                });
+            }
+        });
     });
-});
+}
 
-function loadWeather(latitude, longitude) {
+async function loadAI(weatherData, aqiData) {
+    const modelFileName = 'gemma3-1b-it-int4.task';
+    const output = document.getElementById('ai-coach-output');
+    const getAiButton = document.getElementById("get-ai-pill");
+    const aiButton = document.getElementById("ai-pill");
+    const aiButtonLoading = document.getElementById("ai-pill-loading");
+    const prompt = document.getElementById("prompt");
+
+    let llmInference;
+    getAiButton.addEventListener('click', async function () {
+        getAiButton.style.display = "none";
+        aiButtonLoading.style.display = "inline-block";
+        prompt.style.display = "inline-block";
+
+        const genaiFileset = await FilesetResolver.forGenAiTasks(
+            'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai/wasm');
+
+        LlmInference
+            .createFromOptions(genaiFileset, {
+                baseOptions: { modelAssetPath: modelFileName },
+                maxTokens: 2048,  // The maximum number of tokens (input + output) the model handles.
+                randomSeed: 1,   // The random seed used during text generation.
+                topK: 1,  // The number of tokens the model considers at each step of
+                // generation. Limits predictions to the top k most-probable
+                // tokens. Setting randomSeed is required for this to make
+                // effects.
+                temperature:
+                    0.1,  // The amount of randomness introduced during generation.
+                // Setting randomSeed is required for this to make effects.
+            })
+            .then(llm => {
+                llmInference = llm;
+                aiButtonLoading.style.display = "none";
+                aiButton.style.display = "inline-block";
+                aiButton.style.borderColor = "#C938E3";
+                aiButton.disabled = false;
+            })
+            .catch(() => {
+                alert('Failed to initialize the task.');
+            });
+    });
+
+    function displayPartialResults(partialResults, complete) {
+        if (partialResults == "<end_of_turn>") {
+            complete = true;
+        } else {
+            output.mdContent += partialResults;
+        }
+        if (complete) {
+            aiButton.disabled = false;
+            if (!output.mdContent) {
+                output.mdContent = '';
+            }
+        }
+    }
+
+    aiButton.addEventListener('click', function () {
+        const aqi = document.getElementById("aqi-pill").textContent;
+        const weather = document.getElementById("weather-summary").textContent;
+        const distance = document.getElementById("workout-distance").textContent;
+        const zone = document.getElementById("workout-zone").textContent;
+        let tipping = document.getElementById("tipping-point-pill-run").innerHTML.toString();
+        const precip = document.getElementById("weather-precip").textContent;
+        const strength = document.getElementById("strength").style.display;
+
+        // remove the SVG from the tipping point text
+        tipping = tipping.split("</svg>")[1];
+
+        let inputText = "<bos><start_of_turn>user\nYou are an assistant and endurance training " +
+            "coach. You give clear, simple guidance based on today's planned workout, air quality, " +
+            `and weather conditions. Give guidance based only on your knowledge, listed below:\n\n` +
+            `Weather: Today's weather is ${weather} with ${precip}. if it is stormy or extremely cold ` +
+            `or hot, you should recommend an indoor workout.\n` +
+            `Air quality: The air quality index today is ${aqi}. If the air quality is not "Good", you ` +
+            `should recommend an indoor workout.\n` +
+            `Tipping point: the "tipping point" is the time it takes for the health benefits of exercising ` +
+            `outdoors to be outweighed by the detrimental effects of air pollution. Today's running tipping ` +
+            `point is ${tipping}; running for longer than this time may negate the health benefits of ` +
+            `exercising outdoors.\n` +
+            `Heart rate zone: Today's target heart rate zone is ${zone}. Z1 is very easy, Z2 is ` +
+            `easy enough to maintain a conversation or breathing through your nose, Z3 is difficult ` +
+            `but maintainable for 30 minutes, Z4 is very difficult, and Z5 is maximum effort, maintainable ` +
+            `for only seconds at a time.\n` +
+            `Distance: Today's target workout is a ${distance} run in heart rate zone ${zone}.\n`;
+
+        if (strength != "none") {
+            inputText += "Strength: Strength training is also planned for today.\n";
+        }
+
+        inputText += `\nNow respond to the following prompt with Markdown:\n\n${prompt.value}` +
+            `<end_of_turn>\n<start_of_turn>model\n`;
+        console.log("inputText: ", inputText);
+
+        output.mdContent = '';
+        aiButton.disabled = true;
+        llmInference.generateResponse(inputText, displayPartialResults);
+    });
+}
+
+async function loadWeather(latitude, longitude) {
     fetch(`https://api.weather.gov/points/${latitude},${longitude}`)
         .then(response => response.json())
         .then(enpoint_data => {
@@ -198,12 +305,16 @@ function loadWeather(latitude, longitude) {
         .then(response => response.json())
         .then(forecastData => {
 
+            const precipPill = document.getElementById("weather-precip");
+
             let minTemp24Hours = forecastData.properties.periods.slice(0, 24).map(period => period.temperature).reduce((a, b) => Math.min(a, b));
             let maxTemp24Hours = forecastData.properties.periods.slice(0, 24).map(period => period.temperature).reduce((a, b) => Math.max(a, b));
             let minTemp3Hours = forecastData.properties.periods.slice(0, 3).map(period => period.temperature).reduce((a, b) => Math.min(a, b));
             let maxTemp3Hours = forecastData.properties.periods.slice(0, 3).map(period => period.temperature).reduce((a, b) => Math.max(a, b));
             let maxChanceRain24Hours = forecastData.properties.periods.slice(0, 24).map(period => period.probabilityOfPrecipitation.value).reduce((a, b) => Math.max(a, b));
             let maxChanceRain3Hours = forecastData.properties.periods.slice(0, 3).map(period => period.probabilityOfPrecipitation.value).reduce((a, b) => Math.max(a, b));
+
+            precipPill.textContent = `${maxChanceRain3Hours}% chance of rain in the next 3 hours`;
 
             // Creating space for visualization
             if (minTemp3Hours == maxTemp3Hours) {
@@ -333,9 +444,10 @@ function loadWeather(latitude, longitude) {
                     }
                 }
             });
+            weatherData = data;
         })
         .catch(error => {
-            console.error("Error fetching data:", error);
+            console.error("Error fetching data: ", error);
         });
 }
 
@@ -385,7 +497,7 @@ async function loadPurpleair(url) {
                     }
                 }
             });
-            purpleairPill = document.getElementById("purpleair-pill");
+            const purpleairPill = document.getElementById("purpleair-pill");
             purpleairPill.style.display = "none";
         })
         .catch(error => {
@@ -393,15 +505,14 @@ async function loadPurpleair(url) {
         });
 }
 
-function loadAQI(url) {
+async function loadAQI(url) {
     fetch(url)
         .then(response => response.json())
         .then(data => {
-
-            purpleairPill = document.getElementById("purpleair-pill");
+            const purpleairPill = document.getElementById("purpleair-pill");
 
             // Populate AQI widget
-            aqiPill = document.getElementById("aqi-pill");
+            const aqiPill = document.getElementById("aqi-pill");
             aqiPill.style.background = data.aqi.pill_color_hex;
             aqiPill.style.color = data.aqi.text_color_hex;
             aqiPill.textContent = `${data.aqi.AQI} - ${data.aqi.Category.Name}`;
@@ -436,9 +547,9 @@ function loadAQI(url) {
                 loadPurpleair(urlPurpleair);
             });
 
-            tippingPointRun = document.getElementById("tipping-point-pill-run");
-            tippingPointBike = document.getElementById("tipping-point-pill-bike");
-            tippingPointWalk = document.getElementById("tipping-point-pill-walk");
+            const tippingPointRun = document.getElementById("tipping-point-pill-run");
+            const tippingPointBike = document.getElementById("tipping-point-pill-bike");
+            const tippingPointWalk = document.getElementById("tipping-point-pill-walk");
 
             tippingPointRun.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" fill="currentColor" class="icon" viewBox="0 0 448 512">
                             <path d="M320 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM125.7 175.5c9.9-9.9 23.4-15.5 37.5-15.5c1.9 0 3.8 .1 5.6 .3L137.6 254c-9.3 28 1.7 58.8 26.8 74.5l86.2 53.9-25.4 88.8c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l28.7-100.4c5.9-20.6-2.6-42.6-20.7-53.9L238 299l30.9-82.4 5.1 12.3C289 264.7 323.9 288 362.7 288l21.3 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-21.3 0c-12.9 0-24.6-7.8-29.5-19.7l-6.3-15c-14.6-35.1-44.1-61.9-80.5-73.1l-48.7-15c-11.1-3.4-22.7-5.2-34.4-5.2c-31 0-60.8 12.3-82.7 34.3L57.4 153.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l23.1-23.1zM91.2 352L32 352c-17.7 0-32 14.3-32 32s14.3 32 32 32l69.6 0c19 0 36.2-11.2 43.9-28.5L157 361.6l-9.5-6c-17.5-10.9-30.5-26.8-37.9-44.9L91.2 352z"/>
@@ -487,6 +598,7 @@ function loadAQI(url) {
                     }
                 });
             });
+            aqiData = data;
         })
         .catch(error => {
             console.error("Error fetching data:", error);
@@ -518,8 +630,10 @@ if (hostname === "raspberrypi.local") {
 async function locSuccessCallback(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
+    const aqiUrl = `${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`;
     loadWeather(lat, lon);
-    loadAQI(`${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`);
+    loadAQI(aqiUrl);
+    loadAI(weatherData, aqiData);
 }
 
 function locErrorCallback(position) {
@@ -528,15 +642,18 @@ function locErrorCallback(position) {
         .then(data => {
             const lat = data.loc.split(",")[0];
             const lon = data.loc.split(",")[1];
+            const aqiUrl = `${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`;
             loadWeather(lat, lon);
-            loadAQI(`${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`);
+            loadAQI(aqiUrl);
+            loadAI(weatherData, aqiData);
         })
         .catch(error => {
-            console.error("Error fetching data:", error);
+            console.error("Error fetching data: ", error);
         });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    loadWorkout();
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(locSuccessCallback, locErrorCallback);
     } else {
@@ -545,11 +662,13 @@ document.addEventListener("DOMContentLoaded", () => {
             .then(data => {
                 const lat = data.loc.split(",")[0];
                 const lon = data.loc.split(",")[1];
+                const aqiUrl = `${transferProtocol}//${url}${port}/?lat=${lat}&lon=${lon}&subset=aqi`;
                 loadWeather(lat, lon);
+                loadAQI(aqiUrl);
+                loadAI(weatherData, aqiData);
             })
             .catch(error => {
-                console.error("Error fetching data:", error);
+                console.error("Error fetching data: ", error);
             });
-        loadAQI(`${transferProtocol}//${url}${port}?subset=aqi`);
     }
 });

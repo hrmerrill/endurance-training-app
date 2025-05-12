@@ -44,6 +44,35 @@ body {
     cursor: pointer;
 }
 
+@media (prefers-reduced-motion:no-preference) {
+    .ai-pill {
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        padding: 10px 15px;
+        text-align: center;
+        display: inline-block;
+        margin: 4px 2px;
+        border-radius: 16px;
+        position: relative;
+        cursor: pointer;
+        --text-shimmer: linear-gradient(270deg, rgb(35 42 49), #C938E3 45%, #4941FB 55%, rgb(35 42 49)) 0 0 /440% 100%;
+        animation: aisummary-text-shimmer 8s cubic-bezier(.37, 0, .63, 1) 0s;
+        background: var(--text-shimmer);
+        border-color: #4941FB;
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        animation-fill-mode: forwards;
+        animation-iteration-count: 3;
+    }
+
+    @keyframes aisummary-text-shimmer {
+        to {
+            background-position: -400% 0
+        }
+    }
+}
+
 /* These styles are for overlapping, clickable pill buttons. The
 clicked button is placed on top. */
 .pill-tab-container {
